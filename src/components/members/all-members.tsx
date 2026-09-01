@@ -3,11 +3,13 @@
 import { Member } from "@/src/types/member";
 import { useState, useEffect } from "react";
 import Card from "../card";
+import { useRouter } from "next/navigation";
 
 export function AllMembers() {
   const [data, setData] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +38,14 @@ export function AllMembers() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {data.map((member, index) => (
-        <Card key={index} title={member.name} description={member.role.name} />
+        <Card
+          key={index}
+          title={member.name}
+          description={member.role.name}
+          onClick={() => {
+            router.push(`/members/${member.id}`);
+          }}
+        />
       ))}
     </div>
   );
