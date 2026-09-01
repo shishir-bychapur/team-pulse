@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/src/components/button";
-import Input from "@/src/components/input";
+import Button from "../../components/button/button";
+import Input from "../../components/input/input";
 import { useState } from "react";
 
 const Actions = () => {

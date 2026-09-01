@@ -2,10 +2,10 @@
 
 import { Member } from "@/src/types/member";
 import { useState, useEffect } from "react";
-import Card from "../card";
+import Card from "../card/card";
 import { useRouter } from "next/navigation";
 import SkeletonLoader from "../skeleton-loader";
-import Alert from "../alert";
+import Alert from "../alert/alert";
 
 export function AllMembers() {
   const [data, setData] = useState<Member[]>([]);
@@ -34,14 +34,19 @@ export function AllMembers() {
   }
 
   if (error) {
-    return <Alert title="Unable to fetch members!" message="Please try again later." />;
+    return (
+      <Alert
+        title="Unable to fetch members!"
+        message="Please try again later."
+      />
+    );
   }
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {data.map((member, index) => (
+      {data.map((member) => (
         <Card
-          key={index}
+          key={member.id}
           title={member.name}
           description={member.role.name}
           onClick={() => {

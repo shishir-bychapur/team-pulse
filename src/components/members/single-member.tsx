@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 
 import { Member } from "@/src/types/member";
 import SkeletonLoader from "../skeleton-loader";
-import Alert from "../alert";
+import Alert from "../alert/alert";
 
 export default function SingleMember() {
   const { id } = useParams();
@@ -43,9 +43,9 @@ export default function SingleMember() {
 
   return (
     <div className="mx-2">
-      <h2 className="text-xl font-semibold">Name: {member.name}</h2>
-      <p className="text-lg text-gray-600">Role: {member.role.name}</p>
-      <p className="text-gray-700">Timezone: {member.timezone}</p>
+      <h2 className="text-xl font-semibold">{member.name}</h2>
+      <p className="text-lg text-gray-600">{member.role.name}</p>
+      <p className="text-gray-700">{member.timezone}</p>
     </div>
   );
 }
