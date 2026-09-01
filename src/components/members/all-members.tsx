@@ -7,6 +7,7 @@ import Card from "../card";
 export function AllMembers() {
   const [data, setData] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,6 +18,7 @@ export function AllMembers() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching members:", error);
+        setError("Failed to fetch members");
         setLoading(false);
       }
     };
@@ -25,6 +27,10 @@ export function AllMembers() {
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Members not found. Please try again later.</div>;
   }
 
   return (
