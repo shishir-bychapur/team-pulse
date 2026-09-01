@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
 import { Member } from "@/src/types/member";
+import SkeletonLoader from "../skeleton-loader";
+import Alert from "../alert";
 
 export default function SingleMember() {
   const { id } = useParams();
@@ -27,11 +29,16 @@ export default function SingleMember() {
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <SkeletonLoader />;
   }
 
   if (!member) {
-    return <div className="text-red-500">Member not found.</div>;
+    return (
+      <Alert
+        title="Member not found!"
+        message="The requested member could not be found."
+      />
+    );
   }
 
   return (

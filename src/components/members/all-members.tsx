@@ -4,6 +4,8 @@ import { Member } from "@/src/types/member";
 import { useState, useEffect } from "react";
 import Card from "../card";
 import { useRouter } from "next/navigation";
+import SkeletonLoader from "../skeleton-loader";
+import Alert from "../alert";
 
 export function AllMembers() {
   const [data, setData] = useState<Member[]>([]);
@@ -28,11 +30,11 @@ export function AllMembers() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <SkeletonLoader />;
   }
 
   if (error) {
-    return <div>Members not found. Please try again later.</div>;
+    return <Alert title="Unable to fetch members!" message="Please try again later." />;
   }
 
   return (
