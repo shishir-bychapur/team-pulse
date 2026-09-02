@@ -1,4 +1,24 @@
-export default function MemberFilter() {
+import { Member } from "@/src/types/member";
+import { Dispatch, SetStateAction } from "react";
+import CheckBox from "../input/checkbox";
+
+export default function MemberFilter({
+  members,
+  filter,
+  setFilter,
+}: {
+  members: Member[];
+  filter: string[];
+  setFilter: Dispatch<SetStateAction<string[]>>;
+}) {
+  const callback = (isChecked: boolean, id: string) => {
+    if (isChecked) {
+      setFilter([...filter].filter((memberId) => memberId !== id));
+    } else {
+      setFilter([...filter, id]);
+    }
+  };
+
   return (
     <details className="group relative">
       <summary className="flex items-center gap-2 border-b border-gray-300 pb-1 text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 [&::-webkit-details-marker]:hidden">
@@ -25,9 +45,12 @@ export default function MemberFilter() {
 
       <div className="z-auto w-64 divide-y divide-gray-300 rounded border border-gray-300 bg-white shadow-sm group-open:absolute group-open:start-0 group-open:top-8">
         <div className="flex items-center justify-between px-3 py-2">
-          <span className="text-sm text-gray-700"> 0 Selected </span>
+          <span className="text-sm text-gray-700">
+            {filter.length} Selected{" "}
+          </span>
 
           <button
+            onClick={() => setFilter([])}
             type="button"
             className="text-sm text-gray-700 underline transition-colors hover:text-gray-900"
           >
@@ -39,35 +62,26 @@ export default function MemberFilter() {
           <legend className="sr-only">Checkboxes</legend>
 
           <div className="flex flex-col items-start gap-3">
-            <label htmlFor="Option1" className="inline-flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="size-5 rounded border-gray-300 shadow-sm"
-                id="Option1"
-              />
-
-              <span className="text-sm font-medium text-gray-700">John</span>
-            </label>
-
-            <label htmlFor="Option2" className="inline-flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="size-5 rounded border-gray-300 shadow-sm"
-                id="Option2"
-              />
-
-              <span className="text-sm font-medium text-gray-700">Tom</span>
-            </label>
-
-            <label htmlFor="Option3" className="inline-flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="size-5 rounded border-gray-300 shadow-sm"
-                id="Option3"
-              />
-
-              <span className="text-sm font-medium text-gray-700">Harry</span>
-            </label>
+            {members?.map((member) => {
+              return (
+                <label
+                  key={member.id}
+                  htmlFor={member.name}
+                  className="inline-flex items-center gap-3"
+                >
+                  <CheckBox
+                    id={member.id}
+                    filter={filter}
+                    callback={callback}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {member.name} {"("}
+                    {member.role.name}
+                    {")"}
+                  </span>
+                </label>
+              );
+            })}
           </div>
         </fieldset>
       </div>

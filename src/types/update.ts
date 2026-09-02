@@ -1,7 +1,7 @@
 export enum Mood {
-  GREEN = "green",
-  YELLOW = "yellow",
-  RED = "red",
+  GREEN = "Green",
+  YELLOW = "Yellow",
+  RED = "Red",
 }
 
 export interface Update {

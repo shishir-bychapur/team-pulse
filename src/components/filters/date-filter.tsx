@@ -1,4 +1,13 @@
-export default function DateFilter() {
+import { Dispatch, SetStateAction } from "react";
+import Date from "../input/date";
+
+export default function DateFilter({
+  filter,
+  setFilter,
+}: {
+  filter: string;
+  setFilter: Dispatch<SetStateAction<string>>;
+}) {
   return (
     <details className="group relative">
       <summary className="flex items-center gap-2 border-b border-gray-300 pb-1 text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 [&::-webkit-details-marker]:hidden">
@@ -28,21 +37,14 @@ export default function DateFilter() {
           <button
             type="button"
             className="text-sm text-gray-700 underline transition-colors hover:text-gray-900"
+            onClick={() => setFilter("")}
           >
             Reset
           </button>
         </div>
 
         <div className="flex items-center gap-3 p-3">
-          <label htmlFor="date">
-            <span className="text-sm text-gray-700">Date</span>
-            <input
-              type="date"
-              id="date"
-              value="0"
-              className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
-            />
-          </label>
+          <Date date={filter} setDate={setFilter} />
         </div>
       </div>
     </details>

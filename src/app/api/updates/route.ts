@@ -9,3 +9,5 @@ type ResponseData = {
 export async function GET(req: Request): Promise<NextResponse<ResponseData>> {
   return NextResponse.json({ updates });
 }
+
+
