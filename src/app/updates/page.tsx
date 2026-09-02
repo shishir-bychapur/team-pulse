@@ -29,14 +29,21 @@ const Updates = () => {
     fetchMembers();
   }, []);
 
+  const addParams = () => {
+    const params = new URLSearchParams();
+    memberFilter.forEach((member) => params.append("members", member));
+    moodFilter.forEach((mood) => params.append("moods", mood));
+    if (dateFilter != "") {
+      params.append("date", dateFilter);
+    }
+    return params.toString();
+  };
+
   useEffect(() => {
     const fetchUpdates = async () => {
       try {
-        const params = new URLSearchParams();
-        memberFilter.forEach((member) => params.append("members", member));
-        moodFilter.forEach((mood) => params.append("moods", mood));
-        params.append("date", dateFilter);
-        const response = await fetch("/api/updates" + params.toString());
+        const params = addParams();
+        const response = await fetch("/api/updates?" + params);
         const data: { updates: Update[] } = await response.json();
         setUpdates(data.updates);
       } catch (error) {
