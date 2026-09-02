@@ -15,7 +15,7 @@ export default function CheckBox({
     <input
       id={id}
       type="checkbox"
-      className="size-5 rounded border-gray-300 shadow-sm"
+      className="size-5 rounded border-gray-300 shadow-sm cursor-pointer"
       checked={filter.includes(id)}
       onChange={handler}
     />

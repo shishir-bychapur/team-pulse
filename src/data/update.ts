@@ -1,5 +1,7 @@
 import { Mood, Update } from "../types/update";
 
+export const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
+
 export const updates: Update[] = [
   {
     id: "1",

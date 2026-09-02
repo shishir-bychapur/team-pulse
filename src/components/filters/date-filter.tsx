@@ -36,7 +36,7 @@ export default function DateFilter({
         <div className="flex items-center justify-between px-3 py-2">
           <button
             type="button"
-            className="text-sm text-gray-700 underline transition-colors hover:text-gray-900"
+            className="cursor-pointer text-sm text-gray-700 underline transition-colors hover:text-gray-900"
             onClick={() => setFilter("")}
           >
             Reset

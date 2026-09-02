@@ -52,7 +52,7 @@ export default function MemberFilter({
           <button
             onClick={() => setFilter([])}
             type="button"
-            className="text-sm text-gray-700 underline transition-colors hover:text-gray-900"
+            className="cursor-pointer text-sm text-gray-700 underline transition-colors hover:text-gray-900"
           >
             Reset
           </button>

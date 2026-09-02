@@ -75,9 +75,15 @@ const Updates = () => {
         <MoodFilter filter={moodFilter} setFilter={setMoodFilter} />
         <DateFilter filter={dateFilter} setFilter={setDateFilter} />
       </div>
-      <ul className="bg-white shadow overflow-hidden sm:rounded-md max-w-sm mx-auto mt-4">
+      <ul className="shadow overflow-hidden sm:rounded-md max-w-sm mx-auto mt-4">
         {updates.map((update: Update) => (
-          <UpdateCard key={update.id} update={update} />
+          <UpdateCard
+            key={update.id}
+            update={update}
+            memberName={
+              members.filter((member) => member.id === update.memberId)[0].name
+            }
+          />
         ))}
       </ul>
     </div>

@@ -3,6 +3,7 @@
 import { Mood } from "@/src/types/update";
 import { Dispatch, SetStateAction } from "react";
 import CheckBox from "../input/checkbox";
+import Badge from "../badge/badge";
 
 export default function MoodFilter({
   filter,
@@ -53,7 +54,7 @@ export default function MoodFilter({
 
           <button
             type="button"
-            className="text-sm text-gray-700 underline transition-colors hover:text-gray-900"
+            className="cursor-pointer text-sm text-gray-700 underline transition-colors hover:text-gray-900"
             onClick={() => setFilter([])}
           >
             Reset
@@ -72,9 +73,7 @@ export default function MoodFilter({
               >
                 <CheckBox filter={filter} id={mood} callback={callback} />
 
-                <span className="text-sm font-medium text-gray-700">
-                  {mood}
-                </span>
+                <Badge mood={mood} />
               </label>
             ))}
           </div>

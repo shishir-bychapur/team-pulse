@@ -1,6 +1,7 @@
 import { Update } from "@/src/types/update";
-import { updates } from "@/src/data/update";
+import { moods, updates } from "@/src/data/update";
 import { NextResponse } from "next/server";
+import { members } from "@/src/data/member";
 
 type ResponseData = {
   updates: Update[];
@@ -8,11 +9,26 @@ type ResponseData = {
 
 export async function GET(req: Request): Promise<NextResponse<ResponseData>> {
   const url = new URL(req.url);
-  const members = url.searchParams.get("members");
-  const moods = url.searchParams.get("moods");
+  let filteredMembers = url.searchParams.getAll("members");
+  let filteredMoods = url.searchParams.getAll("moods");
   const date = url.searchParams.get("date");
 
-  console.log(members, moods, date);
+  if (!filteredMembers.length) {
+    filteredMembers = members.map((member) => member.id);
+  }
 
-  return NextResponse.json({ updates });
+  if (!filteredMoods.length) {
+    filteredMoods = moods;
+  }
+
+  const filteredUpdates = updates.filter(
+    (update) =>
+      filteredMembers.includes(update.memberId) &&
+      filteredMoods.includes(update.mood) &&
+      (!date || update.date === date),
+  );
+
+  return NextResponse.json({
+    updates: filteredUpdates,
+  });
 }
