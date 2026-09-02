@@ -21,7 +21,9 @@ const Actions = () => {
           setName(e.target.value)
         }
       />
-      <Button onClick={() => alert(`Hello, ${name}!`)}>Click Me</Button>
+      <Button id="action-button" onClick={() => alert(`Hello, ${name}!`)}>
+        Click Me
+      </Button>
     </div>
   );
 };
