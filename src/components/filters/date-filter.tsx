@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import Date from "../input/date";
+import DateInput from "../input/date";
 
 export default function DateFilter({
   filter,
@@ -44,7 +44,7 @@ export default function DateFilter({
         </div>
 
         <div className="flex items-center gap-3 p-3">
-          <Date date={filter} setDate={setFilter} />
+          <DateInput date={filter} setDate={setFilter} />
         </div>
       </div>
     </details>

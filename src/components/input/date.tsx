@@ -1,6 +1,6 @@
 import { ChangeEvent, Dispatch, SetStateAction } from "react";
 
-export default function Date({
+export default function DateInput({
   date,
   setDate,
 }: {
@@ -8,7 +8,7 @@ export default function Date({
   setDate: Dispatch<SetStateAction<string>>;
 }) {
   return (
-    <label htmlFor="date">
+    <label htmlFor="date-filter">
       <span className="text-sm text-gray-700">Date</span>
       <input
         type="date"
