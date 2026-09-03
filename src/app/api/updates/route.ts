@@ -1,5 +1,5 @@
-import { Update } from "@/src/types/update";
-import { moods, updates } from "@/src/data/update";
+import { Update } from "../../../types/update";
+import { moods, updates } from "../../../data/update";
 import { NextResponse } from "next/server";
 import { members } from "@/src/data/member";
 
