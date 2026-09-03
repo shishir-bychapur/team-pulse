@@ -75,6 +75,11 @@ const Updates = () => {
         <MoodFilter filter={moodFilter} setFilter={setMoodFilter} />
         <DateFilter filter={dateFilter} setFilter={setDateFilter} />
       </div>
+      {updates.length === 0 && (
+        <p className="text-gray-600 mt-4 flex justify-center">
+          No results found!
+        </p>
+      )}
       <ul className="shadow overflow-hidden sm:rounded-md max-w-sm mx-auto mt-4">
         {updates.map((update: Update) => (
           <UpdateCard
