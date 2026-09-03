@@ -24,7 +24,8 @@ describe("Button", () => {
         {mockData.buttonName}
       </Button>,
     );
-    screen.getByTestId("test-button").click();
+    const button = screen.getByText(mockData.buttonName);
+    button.click();
     expect(mockData.onClick).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Mood } from "@/src/types/update";
+import { Mood } from "../../types/update";
 import { Dispatch, SetStateAction } from "react";
 import CheckBox from "../input/checkbox";
 import Badge from "../badge/badge";

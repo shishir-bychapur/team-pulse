@@ -1,4 +1,4 @@
-import { Mood } from "@/src/types/update";
+import { Mood } from "../../types/update";
 
 export default function Badge({ mood }: { mood: Mood }) {
   if (mood === Mood.RED) {

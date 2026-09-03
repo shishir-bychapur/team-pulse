@@ -1,4 +1,4 @@
-import { Member } from "@/src/types/member";
+import { Member } from "../../types/member";
 import { Dispatch, SetStateAction } from "react";
 import CheckBox from "../input/checkbox";
 

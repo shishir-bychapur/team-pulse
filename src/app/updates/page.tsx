@@ -1,12 +1,12 @@
 "use client";
 
-import MoodFilter from "@/src/components/filters/mood-filter";
-import DateFilter from "@/src/components/filters/date-filter";
-import UpdateCard from "@/src/components/updates/update";
-import { Update } from "@/src/types/update";
-import MemberFilter from "@/src/components/filters/member-filter";
+import MoodFilter from "../../components/filters/mood-filter";
+import DateFilter from "../../components/filters/date-filter";
+import UpdateCard from "../../components/updates/update";
+import MemberFilter from "../../components/filters/member-filter";
 import { useState, useEffect } from "react";
-import { Member } from "@/src/types/member";
+import { Member } from "../../types/member";
+import { Update } from "../../types/update";
 
 const Updates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
