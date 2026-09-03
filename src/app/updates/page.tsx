@@ -81,7 +81,7 @@ const Updates = () => {
             key={update.id}
             update={update}
             memberName={
-              members.filter((member) => member.id === update.memberId)[0].name
+              members.find((m) => m.id === update.memberId)?.name || ""
             }
           />
         ))}

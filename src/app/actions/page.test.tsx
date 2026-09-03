@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Actions from "./page";
 
-describe("Actions", () => {
+describe("Actions Page", () => {
   it("renders the actions page", () => {
     render(<Actions />);
     const title = screen.getByText("Actions");
