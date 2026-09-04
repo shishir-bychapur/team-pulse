@@ -31,11 +31,15 @@ describe("MemberFilter", () => {
       <MemberFilter members={members} filter={[]} setFilter={setFilter} />,
     );
 
-    expect(screen.getByText("Tom (Developer)")).toBeInTheDocument();
-    expect(screen.getByText("Harry (Designer)")).toBeInTheDocument();
-    expect(screen.getByText("Dominic (Manager)")).toBeInTheDocument();
-    expect(screen.getByText("Paul (Developer)")).toBeInTheDocument();
-    expect(screen.getByText("Joel (Manager)")).toBeInTheDocument();
+    expect(screen.getByText("Tom")).toBeInTheDocument();
+    expect(screen.getByText("Harry")).toBeInTheDocument();
+    expect(screen.getByText("Dominic")).toBeInTheDocument();
+    expect(screen.getByText("Paul")).toBeInTheDocument();
+    expect(screen.getByText("Joel")).toBeInTheDocument();
+
+    expect(screen.getAllByText("Developer")).toHaveLength(2);
+    expect(screen.getByText("Designer")).toBeInTheDocument();
+    expect(screen.getAllByText("Manager")).toHaveLength(2);
   });
 
   it("displays the number of selected members", () => {
@@ -45,7 +49,8 @@ describe("MemberFilter", () => {
       <MemberFilter members={members} filter={["1"]} setFilter={setFilter} />,
     );
 
-    expect(screen.getByText("1 Selected")).toBeInTheDocument();
+    expect(screen.getByText("1", { selector: "span" })).toBeInTheDocument();
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
   });
 
   it("adds a member to the filter when unchecked checkbox is selected", () => {
@@ -55,10 +60,13 @@ describe("MemberFilter", () => {
       <MemberFilter members={members} filter={[]} setFilter={setFilter} />,
     );
 
-    const checkboxes = screen.getAllByRole("checkbox");
-    fireEvent.click(checkboxes[0]);
+    const checkbox = screen.getByRole("checkbox", {
+      name: "checkbox-1",
+    });
 
-    expect(setFilter).toHaveBeenCalled();
+    fireEvent.click(checkbox);
+
+    expect(setFilter).toHaveBeenCalledWith(["1"]);
   });
 
   it("removes a member from the filter when checked checkbox is unselected", () => {
@@ -72,7 +80,10 @@ describe("MemberFilter", () => {
       />,
     );
 
-    const checkbox = screen.getByRole("checkbox", { name: "checkbox-1" });
+    const checkbox = screen.getByRole("checkbox", {
+      name: "checkbox-1",
+    });
+
     fireEvent.click(checkbox);
 
     expect(setFilter).toHaveBeenCalledWith(["2"]);

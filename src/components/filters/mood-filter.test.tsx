@@ -48,7 +48,8 @@ describe("MoodFilter", () => {
       <MoodFilter filter={[Mood.RED, Mood.GREEN]} setFilter={setFilter} />,
     );
 
-    expect(screen.getByText("2 Selected")).toBeInTheDocument();
+    expect(screen.getByText("2", { selector: "span" })).toBeInTheDocument();
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
   });
 
   it("adds a mood to the filter when selecting an unchecked mood", () => {
@@ -89,6 +90,7 @@ describe("MoodFilter", () => {
     );
 
     const resetButton = screen.getByRole("button", { name: "Reset" });
+
     fireEvent.click(resetButton);
 
     expect(setFilter).toHaveBeenCalledWith([]);
