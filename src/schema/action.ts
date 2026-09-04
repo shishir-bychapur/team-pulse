@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ActionStatus } from "../types/action-item";
+import { ActionStatus } from "../types/action";
 
 export const actionSchema = z.object({
   ownerId: z.string().nonempty("Owner is invalid!"),

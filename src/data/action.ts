@@ -1,4 +1,4 @@
-import { ActionItem, ActionStatus } from "../types/action-item";
+import { ActionItem, ActionStatus } from "../types/action";
 
 export const actionItems: ActionItem[] = [
   {

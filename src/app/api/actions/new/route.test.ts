@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { POST } from "./route";
-import { ActionStatus } from "@/src/types/action-item";
+import { ActionStatus } from "@/src/types/action";
 
 jest.mock("@/src/data/member", () => ({
   members: [
