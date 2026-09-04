@@ -82,7 +82,7 @@ const mockMembers = [
   { id: "member-2", name: "Bob" },
 ];
 
-const mockUpdates = [
+const mockUpdates: Update[] = [
   {
     id: "update-1",
     memberId: "member-1",
@@ -132,15 +132,28 @@ describe("Updates Page", () => {
     });
 
     expect(screen.getByText("Updates")).toBeInTheDocument();
+
     expect(
-      screen.getByText("Filter updates by member, mood, or date."),
+      screen.getByText("Keep track of your team's latest updates."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Filter updates")).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        "Filter by member, mood, or date to find specific updates.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Recent updates")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: "+ Create Update" }),
     ).toBeInTheDocument();
   });
 
   it("fetches members and updates on initial render", async () => {
-    await act(async () => {
-      render(<Updates />);
-    });
+    render(<Updates />);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/members");
@@ -148,20 +161,24 @@ describe("Updates Page", () => {
     });
 
     const cardItems = await screen.findAllByTestId("update-card");
+
     expect(cardItems).toHaveLength(2);
+
     expect(screen.getByText("Finished feature A - Alice")).toBeInTheDocument();
+
+    expect(screen.getByText("Working on bug B - Bob")).toBeInTheDocument();
+
+    expect(screen.getByText("2 updates")).toBeInTheDocument();
   });
 
   it("triggers a new fetch with query params when filters change", async () => {
-    await act(async () => {
-      render(<Updates />);
+    render(<Updates />);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
-
-    await act(async () => {
-      fireEvent.click(screen.getByTestId("member-filter-btn"));
-    });
+    fireEvent.click(screen.getByTestId("member-filter-btn"));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -169,9 +186,7 @@ describe("Updates Page", () => {
       );
     });
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId("mood-filter-btn"));
-    });
+    fireEvent.click(screen.getByTestId("mood-filter-btn"));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -179,9 +194,7 @@ describe("Updates Page", () => {
       );
     });
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId("date-filter-btn"));
-    });
+    fireEvent.click(screen.getByTestId("date-filter-btn"));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -194,17 +207,17 @@ describe("Updates Page", () => {
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
+
     jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network Error"));
 
-    await act(async () => {
-      render(<Updates />);
-    });
+    render(<Updates />);
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(
         "Error fetching members:",
         expect.any(Error),
       );
+
       expect(consoleSpy).toHaveBeenCalledWith(
         "Error fetching updates:",
         expect.any(Error),
