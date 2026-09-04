@@ -33,6 +33,8 @@ const mockMembers = [
 
 describe("CreateUpdate Page", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     jest.spyOn(global, "fetch").mockImplementation((url) => {
       const urlString = typeof url === "string" ? url : url.toString();
 
@@ -52,15 +54,13 @@ describe("CreateUpdate Page", () => {
 
       return Promise.reject(new Error("Unknown endpoint"));
     });
-
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("renders the form fields", () => {
+  it("renders the form fields", async () => {
     render(<CreateUpdate />);
 
     expect(
@@ -81,6 +81,10 @@ describe("CreateUpdate Page", () => {
     expect(
       screen.getByRole("button", { name: "Create Update" }),
     ).toBeInTheDocument();
+
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
+    });
   });
 
   it("fetches and displays members", async () => {
@@ -91,7 +95,7 @@ describe("CreateUpdate Page", () => {
     });
 
     expect(
-      screen.getByRole("option", {
+      await screen.findByRole("option", {
         name: "Alice (Developer)",
       }),
     ).toBeInTheDocument();
@@ -105,19 +109,33 @@ describe("CreateUpdate Page", () => {
 
   it("shows validation errors when submitting an empty form", async () => {
     render(<CreateUpdate />);
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
+
     await waitFor(() => {
       expect(screen.getByText("Member is invalid!")).toBeInTheDocument();
+
       expect(
         screen.getByText("Update text cannot be empty!"),
       ).toBeInTheDocument();
+
       expect(
         screen.getByText("Mood must be of type Red, Yellow or Green!"),
       ).toBeInTheDocument();
+
       expect(
         screen.getByText("Date must be in YYYY-MM-DD format!"),
       ).toBeInTheDocument();
     });
+
     expect(global.fetch).not.toHaveBeenCalledWith(
       "/api/updates/new",
       expect.anything(),
@@ -126,29 +144,30 @@ describe("CreateUpdate Page", () => {
 
   it("handles member API errors gracefully", async () => {
     jest.restoreAllMocks();
+
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
+
     jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network Error"));
+
     render(<CreateUpdate />);
+
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(
         "Error fetching members:",
         expect.any(Error),
       );
     });
+
     consoleSpy.mockRestore();
   });
 
   it("allows the user to fill in the form", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     const memberSelect = screen.getByLabelText("Member");
@@ -157,19 +176,27 @@ describe("CreateUpdate Page", () => {
     const dateInput = screen.getByLabelText("Date");
 
     fireEvent.change(memberSelect, {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(updateInput, {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(moodSelect, {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(dateInput, {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
     expect(memberSelect).toHaveValue("member-1");
@@ -181,31 +208,39 @@ describe("CreateUpdate Page", () => {
   it("submits the form successfully", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -232,31 +267,39 @@ describe("CreateUpdate Page", () => {
   it("resets the form after successful submission", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
@@ -272,6 +315,10 @@ describe("CreateUpdate Page", () => {
 
   it("shows an error toast when creating an update fails", async () => {
     jest.restoreAllMocks();
+
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     jest.spyOn(global, "fetch").mockImplementation((url) => {
       const urlString = typeof url === "string" ? url : url.toString();
@@ -292,61 +339,79 @@ describe("CreateUpdate Page", () => {
 
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Something went wrong" },
+      target: {
+        value: "Something went wrong",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Error creating a new update!");
     });
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+
+    consoleSpy.mockRestore();
   });
 
   it("shows an error when member is missing", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Member is invalid!")).toBeInTheDocument();
@@ -368,27 +433,33 @@ describe("CreateUpdate Page", () => {
   it("shows an error when update text is missing", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(
@@ -400,27 +471,33 @@ describe("CreateUpdate Page", () => {
   it("shows an error when mood is missing", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: "2026-09-04" },
+      target: {
+        value: "2026-09-04",
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(
@@ -432,27 +509,33 @@ describe("CreateUpdate Page", () => {
   it("shows an error when date is missing", async () => {
     render(<CreateUpdate />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("option", {
-          name: "Alice (Developer)",
-        }),
-      ).toBeInTheDocument();
+    await screen.findByRole("option", {
+      name: "Alice (Developer)",
     });
 
     fireEvent.change(screen.getByLabelText("Member"), {
-      target: { value: "member-1" },
+      target: {
+        value: "member-1",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Update"), {
-      target: { value: "Finished feature A" },
+      target: {
+        value: "Finished feature A",
+      },
     });
 
     fireEvent.change(screen.getByLabelText("Mood"), {
-      target: { value: Mood.GREEN },
+      target: {
+        value: Mood.GREEN,
+      },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Update" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Create Update",
+      }),
+    );
 
     await waitFor(() => {
       expect(
