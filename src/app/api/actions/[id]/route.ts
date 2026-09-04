@@ -1,16 +1,35 @@
+import { ActionItem } from "@/src/types/action";
 import { NextResponse } from "next/server";
-import { members } from "@/src/data/member";
-import { actionSchema } from "@/src/schema/action";
 import { actionItems } from "@/src/data/action";
+import { actionSchema } from "@/src/schema/action";
+import { members } from "@/src/data/member";
 
-type ResponseData = {
+type GetResponseData = {
+  action: ActionItem | null;
+};
+
+type PatchResponseData = {
   errors?: string;
 };
+
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse<GetResponseData>> {
+  const { id } = await params;
+  const actionItem = actionItems.find((ac) => ac.id === id);
+
+  if (!actionItem) {
+    return NextResponse.json({ action: null }, { status: 404 });
+  }
+
+  return NextResponse.json({ action: actionItem });
+}
 
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
-): Promise<NextResponse<ResponseData>> {
+): Promise<NextResponse<PatchResponseData>> {
   const data = await req.json();
   const validationResult = actionSchema.safeParse(data);
   if (!validationResult.success) {

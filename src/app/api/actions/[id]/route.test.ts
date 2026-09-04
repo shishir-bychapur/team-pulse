@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { PATCH } from "./route";
+import { GET, PATCH } from "./route";
 import { ActionStatus } from "@/src/types/action";
 
 jest.mock("@/src/data/member", () => ({
@@ -28,8 +28,8 @@ jest.mock("@/src/data/action", () => ({
   ],
 }));
 
-describe("PATCH /api/actions/[id]/edit", () => {
-  const baseUrl = "http://localhost:3000/api/actions/act-1/edit";
+describe("PATCH /api/actions/[id]", () => {
+  const baseUrl = "http://localhost:3000/api/actions/act-1";
 
   const mockValidAction = {
     title: "Design actions",
@@ -103,15 +103,38 @@ describe("PATCH /api/actions/[id]/edit", () => {
     });
 
     it("returns error when id doesn't exist", async () => {
-      const req = new NextRequest(
-        "http://localhost:3000/api/actions/act-3/edit",
-        {
-          method: "POST",
-          body: JSON.stringify(mockValidAction),
-        },
-      );
+      const req = new NextRequest("http://localhost:3000/api/actions/act-3", {
+        method: "POST",
+        body: JSON.stringify(mockValidAction),
+      });
       const response = await PATCH(req, invalidParams);
       expect(response.status).toBe(404);
     });
+  });
+});
+
+describe("GET /api/actions/[id]", () => {
+  const baseUrl = "http://localhost:3000/api/actions/act-1";
+
+  const mockParams = {
+    params: Promise.resolve({ id: "act-1" }),
+  };
+
+  const invalidParams = {
+    params: Promise.resolve({ id: "act-3" }),
+  };
+
+  it("returns successfully with correct action id", async () => {
+    const req = new NextRequest(baseUrl);
+    const response = await GET(req, mockParams);
+
+    expect(response.status).toBe(200);
+  });
+
+  it("returns error if action id doesnt exist", async () => {
+    const req = new NextRequest(baseUrl);
+    const response = await GET(req, invalidParams);
+
+    expect(response.status).toBe(404);
   });
 });
