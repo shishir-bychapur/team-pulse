@@ -7,6 +7,7 @@ import MemberFilter from "../../components/filters/member-filter";
 import { useState, useEffect } from "react";
 import { Member } from "../../types/member";
 import { Update } from "../../types/update";
+import Link from "next/link";
 
 const Updates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
@@ -60,6 +61,9 @@ const Updates = () => {
         <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight">
           Updates
         </h1>
+      </div>
+      <div className="flex gap-4 mt-2 justify-center">
+        <Link href="/updates/new" className="text-blue-600 underline hover:text-blue-800 transition-colors">Create Update</Link>
       </div>
       <div className="flex gap-4 mt-2 justify-center">
         <p className="text-gray-600">

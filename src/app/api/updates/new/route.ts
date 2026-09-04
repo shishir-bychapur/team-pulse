@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { members } from "@/src/data/member";
+import { updates } from "@/src/data/update";
 import { updateSchema } from "@/src/schema/update";
 
 type ResponseData = {
@@ -29,6 +30,6 @@ export async function POST(req: Request): Promise<NextResponse<ResponseData>> {
     );
   }
 
-  members.push({ id: crypto.randomUUID(), ...data });
+  updates.push({ id: crypto.randomUUID(), ...data });
   return NextResponse.json({}, { status: 200 });
 }

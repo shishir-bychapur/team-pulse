@@ -75,6 +75,15 @@ describe("POST /api/updates/new", () => {
       expect(response.status).toBe(400);
     });
 
+    it("returns error when date is in correct format but is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, date: "2026-15-41" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+    });
+
     it("returns error when text is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",

@@ -12,15 +12,15 @@ const Input = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <div className="mb-4">
+    <div>
       <label
-        className="block text-gray-700 text-sm font-bold mb-2"
+        className="mb-2 block text-sm font-medium text-gray-700"
         htmlFor={id}
       >
         {label}
       </label>
       <input
-        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-10"
         id={id}
         type={type}
         placeholder={label}
