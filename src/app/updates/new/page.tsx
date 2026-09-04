@@ -42,7 +42,7 @@ export default function CreateUpdate() {
 
   const onSubmit = async (data: UpdateForm) => {
     try {
-      const response = await fetch("/api/updates/new", {
+      const response = await fetch("/api/updates", {
         method: "POST",
         body: JSON.stringify(data),
       });

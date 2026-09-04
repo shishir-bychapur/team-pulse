@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { GET } from "./route";
+import { GET, POST } from "./route";
+import { Mood } from "@/src/types/update";
 
 jest.mock("@/src/data/member", () => ({
   members: [
@@ -114,5 +115,73 @@ describe("GET /api/updates", () => {
     const data = await response.json();
 
     expect(data.updates).toEqual([]);
+  });
+});
+
+describe("POST /api/updates", () => {
+  const baseUrl = "http://localhost:3000/api/updates";
+
+  const mockValidUpdate = {
+    memberId: "member-1",
+    date: "2026-09-01",
+    text: "Worked on next.js routing.",
+    mood: Mood.RED,
+  };
+
+  it("returns successfully when creating new update", async () => {
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidUpdate),
+    });
+    const response = await POST(req);
+
+    expect(response.status).toBe(200);
+  });
+
+  describe("returns error when", () => {
+    it("returns error when memberId is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, memberId: "-1" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(403);
+    });
+
+    it("returns error when date is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, date: "-1" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+    });
+
+    it("returns error when date is in correct format but is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, date: "2026-15-41" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+    });
+
+    it("returns error when text is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, text: "" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+    });
+
+    it("returns error when mood is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({ ...mockValidUpdate, mood: "WHITE" }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+    });
   });
 });

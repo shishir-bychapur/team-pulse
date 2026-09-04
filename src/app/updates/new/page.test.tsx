@@ -45,7 +45,7 @@ describe("CreateUpdate Page", () => {
         } as Response);
       }
 
-      if (urlString === "/api/updates/new") {
+      if (urlString === "/api/updates") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({}),
@@ -137,7 +137,7 @@ describe("CreateUpdate Page", () => {
     });
 
     expect(global.fetch).not.toHaveBeenCalledWith(
-      "/api/updates/new",
+      "/api/updates",
       expect.anything(),
     );
   });
@@ -244,7 +244,7 @@ describe("CreateUpdate Page", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        "/api/updates/new",
+        "/api/updates",
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({
@@ -330,7 +330,7 @@ describe("CreateUpdate Page", () => {
         } as Response);
       }
 
-      if (urlString === "/api/updates/new") {
+      if (urlString === "/api/updates") {
         return Promise.reject(new Error("Network Error"));
       }
 
