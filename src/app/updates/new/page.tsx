@@ -60,7 +60,6 @@ export default function CreateUpdate() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             Create an Update
@@ -71,13 +70,11 @@ export default function CreateUpdate() {
           </p>
         </div>
 
-        {/* Form Card */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-6"
           >
-            {/* Member */}
             <div>
               <label
                 htmlFor="member"
@@ -111,7 +108,6 @@ export default function CreateUpdate() {
               )}
             </div>
 
-            {/* Update */}
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <label
@@ -145,7 +141,6 @@ export default function CreateUpdate() {
               )}
             </div>
 
-            {/* Mood */}
             <div>
               <label
                 htmlFor="mood"
@@ -179,7 +174,6 @@ export default function CreateUpdate() {
               )}
             </div>
 
-            {/* Date */}
             <div>
               <label
                 htmlFor="date"
@@ -206,7 +200,6 @@ export default function CreateUpdate() {
               )}
             </div>
 
-            {/* Divider */}
             <div className="border-t border-gray-100 pt-2">
               <button
                 type="submit"

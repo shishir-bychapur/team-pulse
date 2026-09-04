@@ -28,7 +28,6 @@ export default function MemberFilter({
             : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
         }`}
       >
-        {/* Filter icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -52,7 +51,6 @@ export default function MemberFilter({
           </span>
         )}
 
-        {/* Chevron */}
         <svg
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +69,6 @@ export default function MemberFilter({
       </summary>
 
       <div className="absolute start-0 top-12 z-20 w-72 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <div>
             <p className="text-sm font-semibold text-gray-900">Members</p>
@@ -93,7 +90,6 @@ export default function MemberFilter({
           )}
         </div>
 
-        {/* Options */}
         <fieldset className="max-h-64 overflow-y-auto p-2">
           <legend className="sr-only">Members</legend>
 

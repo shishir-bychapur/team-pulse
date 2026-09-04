@@ -31,7 +31,6 @@ export default function MoodFilter({
             : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
         }`}
       >
-        {/* Mood icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -78,7 +77,6 @@ export default function MoodFilter({
       </summary>
 
       <div className="absolute start-0 top-12 z-20 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <div>
             <p className="text-sm font-semibold text-gray-900">Mood</p>
@@ -98,7 +96,6 @@ export default function MoodFilter({
           )}
         </div>
 
-        {/* Options */}
         <fieldset className="p-2">
           <legend className="sr-only">Moods</legend>
 

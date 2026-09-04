@@ -61,7 +61,6 @@ const Updates = () => {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -80,7 +79,6 @@ const Updates = () => {
           </Link>
         </div>
 
-        {/* Filters */}
         <section className="mb-8 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4">
             <h2 className="text-sm font-semibold text-gray-900">
@@ -104,7 +102,6 @@ const Updates = () => {
           </div>
         </section>
 
-        {/* Results header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">
             Recent updates
@@ -115,7 +112,6 @@ const Updates = () => {
           </span>
         </div>
 
-        {/* Updates */}
         {updates.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl">
