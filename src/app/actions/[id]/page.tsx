@@ -1,5 +1,5 @@
-import { actionAPI } from "@/src/apis/action";
-import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/utils/apis/action";
+import { memberAPI } from "@/src/utils/apis/member";
 import { ActionStatus } from "@/src/types/action";
 import Link from "next/link";
 import { notFound } from "next/navigation";

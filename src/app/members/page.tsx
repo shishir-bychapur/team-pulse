@@ -1,5 +1,5 @@
 import { AllMembers } from "@/src/components/members/all-members";
-import { memberAPI } from "@/src/apis/member";
+import { memberAPI } from "@/src/utils/apis/member";
 
 const Members = async () => {
   const data = await memberAPI.getAllMembers();

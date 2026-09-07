@@ -3,13 +3,13 @@ import { render, screen } from "@testing-library/react";
 import MemberPage from "./page";
 import { notFound } from "next/navigation";
 import { Member } from "@/src/types/member";
-import { memberAPI } from "@/src/apis/member";
+import { memberAPI } from "@/src/utils/apis/member";
 
 jest.mock("next/navigation", () => ({
   notFound: jest.fn(),
 }));
 
-jest.mock("@/src/apis/member", () => ({
+jest.mock("@/src/utils/apis/member", () => ({
   memberAPI: {
     getSingleMember: jest.fn(),
   },

@@ -1,8 +1,8 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import ActionPage from "./page";
-import { actionAPI } from "@/src/apis/action";
-import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/utils/apis/action";
+import { memberAPI } from "@/src/utils/apis/member";
 import { ActionStatus } from "@/src/types/action";
 import { notFound } from "next/navigation";
 
@@ -10,13 +10,13 @@ jest.mock("next/navigation", () => ({
   notFound: jest.fn(),
 }));
 
-jest.mock("@/src/apis/action", () => ({
+jest.mock("@/src/utils/apis/action", () => ({
   actionAPI: {
     getSingleAction: jest.fn(),
   },
 }));
 
-jest.mock("@/src/apis/member", () => ({
+jest.mock("@/src/utils/apis/member", () => ({
   memberAPI: {
     getSingleMember: jest.fn(),
   },

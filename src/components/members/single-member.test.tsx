@@ -3,13 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import SingleMember from "./single-member";
 import { useParams } from "next/navigation";
 import { members } from "../../data/member";
-import { memberAPI } from "@/src/apis/member";
+import { memberAPI } from "@/src/utils/apis/member";
 
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock("@/src/apis/member", () => ({
+jest.mock("@/src/utils/apis/member", () => ({
   memberAPI: {
     getSingleMember: jest.fn(),
   },

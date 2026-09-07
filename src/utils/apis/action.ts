@@ -1,6 +1,6 @@
-import { ActionForm } from "../schema/action";
-import { ActionItem } from "../types/action";
-import { getBaseUrl } from "../utils/base-url";
+import { ActionForm } from "@/src/schema/action";
+import { ActionItem } from "@/src/types/action";
+import { getBaseUrl } from "../base-url";
 
 export const actionAPI = {
   async getSingleAction(id: string): Promise<{ action: ActionItem | null }> {

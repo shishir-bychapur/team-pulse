@@ -9,8 +9,8 @@ import {
 import Updates from "./page";
 import { Dispatch, SetStateAction } from "react";
 import { Mood, Update } from "@/src/types/update";
-import { memberAPI } from "@/src/apis/member";
-import { updateAPI } from "@/src/apis/update";
+import { memberAPI } from "@/src/utils/apis/member";
+import { updateAPI } from "@/src/utils/apis/update";
 
 jest.mock("../../components/filters/member-filter", () => {
   return function MockMemberFilter({
@@ -79,13 +79,13 @@ jest.mock("../../components/updates/update", () => {
   };
 });
 
-jest.mock("@/src/apis/member", () => ({
+jest.mock("@/src/utils/apis/member", () => ({
   memberAPI: {
     getAllMembers: jest.fn(),
   },
 }));
 
-jest.mock("@/src/apis/update", () => ({
+jest.mock("@/src/utils/apis/update", () => ({
   updateAPI: {
     getUpdates: jest.fn(),
   },
