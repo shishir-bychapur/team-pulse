@@ -5,8 +5,8 @@ import { Member } from "../../types/member";
 import Link from "next/link";
 import { ActionItem } from "@/src/types/action";
 import ActionCard from "@/src/components/actions/action";
-import { memberAPI } from "@/src/services/member";
-import { actionAPI } from "@/src/services/action";
+import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/apis/action";
 
 const Actions = () => {
   const [members, setMembers] = useState<Member[]>([]);

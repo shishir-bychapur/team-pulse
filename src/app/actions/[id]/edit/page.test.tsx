@@ -22,21 +22,21 @@ jest.mock("sonner", () => ({
   },
 }));
 
-jest.mock("@/src/services/member", () => ({
+jest.mock("@/src/apis/member", () => ({
   memberAPI: {
     getAllMembers: jest.fn(),
   },
 }));
 
-jest.mock("@/src/services/action", () => ({
+jest.mock("@/src/apis/action", () => ({
   actionAPI: {
     getSingleAction: jest.fn(),
     editAction: jest.fn(),
   },
 }));
 
-import { memberAPI } from "@/src/services/member";
-import { actionAPI } from "@/src/services/action";
+import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/apis/action";
 
 const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
 const mockedActionAPI = actionAPI as jest.Mocked<typeof actionAPI>;

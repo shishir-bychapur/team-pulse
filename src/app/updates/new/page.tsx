@@ -2,8 +2,8 @@
 
 import { moods } from "@/src/data/update";
 import { UpdateForm, updateSchema } from "@/src/schema/update";
-import { memberAPI } from "@/src/services/member";
-import { updateAPI } from "@/src/services/update";
+import { memberAPI } from "@/src/apis/member";
+import { updateAPI } from "@/src/apis/update";
 import { Member } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";

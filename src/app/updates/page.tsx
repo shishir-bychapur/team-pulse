@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 import { Member } from "../../types/member";
 import { Update } from "../../types/update";
 import Link from "next/link";
-import { memberAPI } from "@/src/services/member";
-import { updateAPI } from "@/src/services/update";
+import { memberAPI } from "@/src/apis/member";
+import { updateAPI } from "@/src/apis/update";
 
 const Updates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);

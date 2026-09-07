@@ -3,8 +3,8 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CreateUpdate from "./page";
 import { Mood } from "@/src/types/update";
 import { toast } from "sonner";
-import { memberAPI } from "@/src/services/member";
-import { updateAPI } from "@/src/services/update";
+import { memberAPI } from "@/src/apis/member";
+import { updateAPI } from "@/src/apis/update";
 
 jest.mock("sonner", () => ({
   toast: {
@@ -13,13 +13,13 @@ jest.mock("sonner", () => ({
   },
 }));
 
-jest.mock("@/src/services/member", () => ({
+jest.mock("@/src/apis/member", () => ({
   memberAPI: {
     getAllMembers: jest.fn(),
   },
 }));
 
-jest.mock("@/src/services/update", () => ({
+jest.mock("@/src/apis/update", () => ({
   updateAPI: {
     createUpdate: jest.fn(),
   },

@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { memberAPI } from "@/src/services/member";
-import { actionAPI } from "@/src/services/action";
+import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/apis/action";
 
 export default function CreateAction() {
   const router = useRouter();

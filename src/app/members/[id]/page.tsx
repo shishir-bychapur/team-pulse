@@ -1,4 +1,4 @@
-import { memberAPI } from "@/src/services/member";
+import { memberAPI } from "@/src/apis/member";
 import { notFound } from "next/navigation";
 
 export default async function MemberPage({

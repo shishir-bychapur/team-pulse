@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { Member } from "@/src/types/member";
 import SkeletonLoader from "../loader/skeleton-loader";
 import Alert from "../alert/alert";
-import { memberAPI } from "@/src/services/member";
+import { memberAPI } from "@/src/apis/member";
 
 export default function SingleMember() {
   const { id } = useParams<{ id: string }>();

@@ -1,10 +1,10 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Members from "./page";
-import { memberAPI } from "@/src/services/member";
+import { memberAPI } from "@/src/apis/member";
 import { Member } from "@/src/types/member";
 
-jest.mock("@/src/services/member", () => ({
+jest.mock("@/src/apis/member", () => ({
   memberAPI: {
     getAllMembers: jest.fn(),
   },
