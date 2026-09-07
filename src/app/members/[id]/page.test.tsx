@@ -28,7 +28,7 @@ const mockMember: Member = {
   timezone: "UTC-5",
 };
 
-describe("Member Page", () => {
+describe("MemberPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -47,15 +47,59 @@ describe("Member Page", () => {
     expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith("123");
 
     expect(
-      screen.getByRole("heading", { name: "Member Page" }),
+      screen.getByRole("heading", { name: "Member Details" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("View information about this team member."),
     ).toBeInTheDocument();
 
     expect(screen.getByText("Alice Johnson")).toBeInTheDocument();
-    expect(screen.getByText("Software Engineer")).toBeInTheDocument();
+
+    // Role appears in both the profile badge and member information section
+    expect(screen.getAllByText("Software Engineer").length).toBeGreaterThan(0);
+
     expect(screen.getByText("UTC-5")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", { name: "Member Information" }),
+    ).toBeInTheDocument();
   });
 
-  it("calls notFound() when the member is null", async () => {
+  it("renders a link back to the members page", async () => {
+    mockedMemberAPI.getSingleMember.mockResolvedValue({
+      member: mockMember,
+    });
+
+    const params = Promise.resolve({ id: "123" });
+
+    const ResolvedPage = await MemberPage({ params });
+
+    render(ResolvedPage);
+
+    const backLink = screen.getByRole("link", {
+      name: /back to members/i,
+    });
+
+    expect(backLink).toBeInTheDocument();
+    expect(backLink).toHaveAttribute("href", "/members");
+  });
+
+  it("renders the member initial in the avatar", async () => {
+    mockedMemberAPI.getSingleMember.mockResolvedValue({
+      member: mockMember,
+    });
+
+    const params = Promise.resolve({ id: "123" });
+
+    const ResolvedPage = await MemberPage({ params });
+
+    render(ResolvedPage);
+
+    expect(screen.getByText("A")).toBeInTheDocument();
+  });
+
+  it("calls notFound when the member is null", async () => {
     mockedMemberAPI.getSingleMember.mockResolvedValue({
       member: null,
     });
