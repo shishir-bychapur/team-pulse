@@ -1,27 +1,36 @@
 import { NextRequest } from "next/server";
 import { GET } from "./route";
+import { memberService } from "@/src/services/member";
+import { Member } from "@/src/types/member";
 
-jest.mock("@/src/data/member", () => ({
-  members: [
-    {
-      id: "1",
-      name: "Tom",
-      timezone: "America/New_York",
-      role: { id: "r1", name: "Developer" },
-    },
-    {
-      id: "2",
-      name: "Harry",
-      timezone: "Europe/London",
-      role: { id: "r2", name: "Designer" },
-    },
-  ],
+jest.mock("@/src/services/member", () => ({
+  memberService: {
+    getMember: jest.fn(),
+  },
 }));
+
+const mockedMemberService = memberService as jest.Mocked<typeof memberService>;
 
 describe("GET /api/members/[id]", () => {
   const baseUrl = "http://localhost:3000/api/members";
 
-  it("returns status 200 and member details when member exists", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return status 200 and member details when member exists", async () => {
+    const mockMember: Member = {
+      id: "1",
+      name: "Tom",
+      timezone: "America/New_York",
+      role: {
+        id: "r1",
+        name: "Developer",
+      },
+    };
+
+    mockedMemberService.getMember.mockReturnValue(mockMember);
+
     const req = new NextRequest(`${baseUrl}/1`);
     const params = Promise.resolve({ id: "1" });
 
@@ -29,22 +38,38 @@ describe("GET /api/members/[id]", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.member).toEqual({
-      id: "1",
-      name: "Tom",
-      timezone: "America/New_York",
-      role: { id: "r1", name: "Developer" },
+
+    expect(data).toEqual({
+      member: mockMember,
     });
+
+    expect(mockedMemberService.getMember).toHaveBeenCalledWith("1");
+
+    expect(mockedMemberService.getMember).toHaveBeenCalledTimes(1);
   });
 
-  it("returns status 404 and null when member is not found", async () => {
+  it("should return status 404 and null when member is not found", async () => {
+    mockedMemberService.getMember.mockReturnValue(undefined);
+
     const req = new NextRequest(`${baseUrl}/non-existent-id`);
-    const params = Promise.resolve({ id: "non-existent-id" });
+
+    const params = Promise.resolve({
+      id: "non-existent-id",
+    });
 
     const response = await GET(req, { params });
     const data = await response.json();
 
     expect(response.status).toBe(404);
-    expect(data.member).toBeNull();
+
+    expect(data).toEqual({
+      member: null,
+    });
+
+    expect(mockedMemberService.getMember).toHaveBeenCalledWith(
+      "non-existent-id",
+    );
+
+    expect(mockedMemberService.getMember).toHaveBeenCalledTimes(1);
   });
 });

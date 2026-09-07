@@ -1,48 +1,82 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { ActionStatus } from "@/src/types/action";
+import { ActionItem, ActionStatus } from "@/src/types/action";
+import { actionService } from "@/src/services/action";
 
-jest.mock("@/src/data/member", () => ({
-  members: [
-    { id: "member-1", name: "Alice" },
-    { id: "member-2", name: "Bob" },
-  ],
+jest.mock("@/src/services/action", () => ({
+  actionService: {
+    getActions: jest.fn(),
+    createAction: jest.fn(),
+  },
 }));
 
-jest.mock("@/src/data/action", () => ({
-  actionItems: [
-    {
-      id: "act-1",
-      title: "Setup CI pipeline",
-      ownerId: "member-1",
-      status: "Open",
-      dueDate: "2026-09-17",
-    },
-    {
-      id: "act-2",
-      title: "Design dashboard",
-      ownerId: "member-2",
-      status: "Closed",
-      dueDate: "2026-09-21",
-    },
-  ],
-}));
+const mockedActionService = actionService as jest.Mocked<typeof actionService>;
 
 describe("GET /api/actions", () => {
   const baseUrl = "http://localhost:3000/api/actions";
 
-  it("returns all actions", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return all actions successfully", async () => {
+    const mockActions: ActionItem[] = [
+      {
+        id: "act-1",
+        title: "Setup CI pipeline",
+        ownerId: "member-1",
+        status: ActionStatus.OPEN,
+        dueDate: "2026-09-17",
+      },
+      {
+        id: "act-2",
+        title: "Design dashboard",
+        ownerId: "member-2",
+        status: ActionStatus.CLOSED,
+        dueDate: "2026-09-21",
+      },
+    ];
+
+    mockedActionService.getActions.mockReturnValue(mockActions);
+
     const req = new NextRequest(baseUrl);
+
     const response = await GET(req);
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.actions).toHaveLength(2);
+
+    expect(data).toEqual({
+      actions: mockActions,
+    });
+
+    expect(mockedActionService.getActions).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return an empty array when there are no actions", async () => {
+    mockedActionService.getActions.mockReturnValue([]);
+
+    const req = new NextRequest(baseUrl);
+
+    const response = await GET(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(data).toEqual({
+      actions: [],
+    });
+
+    expect(mockedActionService.getActions).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("POST /api/actions", () => {
   const baseUrl = "http://localhost:3000/api/actions";
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const mockValidAction = {
     title: "Design actions",
@@ -51,80 +85,142 @@ describe("POST /api/actions", () => {
     dueDate: "2026-09-23",
   };
 
-  it("returns successfully when creating new action", async () => {
+  it("should create an action successfully", async () => {
+    mockedActionService.createAction.mockReturnValue("generated-action-id");
+
     const req = new NextRequest(baseUrl, {
       method: "POST",
       body: JSON.stringify(mockValidAction),
     });
+
     const response = await POST(req);
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.id).toEqual(expect.any(String));
-    expect(data.errors).toEqual(undefined);
+
+    expect(data).toEqual({
+      id: "generated-action-id",
+    });
+
+    expect(mockedActionService.createAction).toHaveBeenCalledWith(
+      mockValidAction,
+    );
+
+    expect(mockedActionService.createAction).toHaveBeenCalledTimes(1);
   });
 
-  describe("returns error when", () => {
-    it("returns error when ownerId is invalid", async () => {
+  describe("should return validation error when", () => {
+    it("title is missing", async () => {
+      const { title, ...invalidAction } = mockValidAction;
+
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidAction, ownerId: "-1" }),
+        body: JSON.stringify(invalidAction),
       });
+
       const response = await POST(req);
       const data = await response.json();
-      expect(response.status).toBe(403);
-      expect(data.id).toEqual(undefined);
-      expect(data.errors).toContain(
-        "There is no member with the given ownerId!",
-      );
+
+      expect(response.status).toBe(400);
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("returns error when title is invalid", async () => {
+    it("title is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidAction, title: "" }),
+        body: JSON.stringify({
+          ...mockValidAction,
+          title: "",
+        }),
       });
+
       const response = await POST(req);
       const data = await response.json();
+
       expect(response.status).toBe(400);
-      expect(data.id).toEqual(undefined);
-      expect(data.errors).toContain("Title cannot be empty!");
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("returns error when due date is in correct format but is invalid", async () => {
+    it("due date is in the correct format but invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidAction, dueDate: "2026-15-41" }),
+        body: JSON.stringify({
+          ...mockValidAction,
+          dueDate: "2026-15-41",
+        }),
       });
+
       const response = await POST(req);
       const data = await response.json();
+
       expect(response.status).toBe(400);
-      expect(data.id).toEqual(undefined);
-      expect(data.errors).toContain("Invalid date!");
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("returns error when due date is invalid", async () => {
+    it("due date is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidAction, dueDate: "2026" }),
+        body: JSON.stringify({
+          ...mockValidAction,
+          dueDate: "2026",
+        }),
       });
+
       const response = await POST(req);
       const data = await response.json();
+
       expect(response.status).toBe(400);
-      expect(data.id).toEqual(undefined);
-      expect(data.errors).toContain("Date must be in YYYY-MM-DD format!");
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("returns error when status is invalid", async () => {
+    it("status is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidAction, status: "PENDING" }),
+        body: JSON.stringify({
+          ...mockValidAction,
+          status: "PENDING",
+        }),
       });
+
       const response = await POST(req);
       const data = await response.json();
+
       expect(response.status).toBe(400);
-      expect(data.id).toEqual(undefined);
-      expect(data.errors).toContain("Status must be of type Open or Closed!");
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
+  });
+
+  it("should return 403 when the owner does not exist", async () => {
+    mockedActionService.createAction.mockImplementation(() => {
+      throw new Error("There is no member with the given ownerId!");
+    });
+
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidAction),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+
+    expect(data).toEqual({
+      errors: "There is no member with the given ownerId!",
+    });
+
+    expect(mockedActionService.createAction).toHaveBeenCalledWith(
+      mockValidAction,
+    );
   });
 });

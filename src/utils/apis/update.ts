@@ -1,6 +1,6 @@
-import { UpdateForm } from "../schema/update";
-import { Update } from "../types/update";
-import { getBaseUrl } from "../utils/base-url";
+import { UpdateForm } from "@/src/schema/update";
+import { Update } from "@/src/types/update";
+import { getBaseUrl } from "../base-url";
 
 export const updateAPI = {
   async createUpdate(data: UpdateForm): Promise<Response> {

@@ -1,125 +1,92 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { Mood } from "@/src/types/update";
+import { Mood, Update } from "@/src/types/update";
+import { updateService } from "@/src/services/update";
 
-jest.mock("@/src/data/member", () => ({
-  members: [
-    { id: "member-1", name: "Alice" },
-    { id: "member-2", name: "Bob" },
-  ],
+jest.mock("@/src/services/update", () => ({
+  updateService: {
+    getUpdates: jest.fn(),
+    createUpdate: jest.fn(),
+  },
 }));
 
-jest.mock("@/src/data/update", () => ({
-  moods: ["RED", "YELLOW", "GREEN"],
-  updates: [
-    {
-      id: "1",
-      memberId: "member-1",
-      mood: "GREEN",
-      date: "2026-09-01",
-      text: "Update 1",
-    },
-    {
-      id: "2",
-      memberId: "member-1",
-      mood: "YELLOW",
-      date: "2026-09-02",
-      text: "Update 2",
-    },
-    {
-      id: "3",
-      memberId: "member-2",
-      mood: "RED",
-      date: "2026-09-01",
-      text: "Update 3",
-    },
-  ],
-}));
+const mockedUpdateService = updateService as jest.Mocked<
+  typeof updateService
+>;
 
 describe("GET /api/updates", () => {
   const baseUrl = "http://localhost:3000/api/updates";
 
-  it("returns all updates when no filter search parameters are provided", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return updates successfully", async () => {
+    const mockUpdates: Update[] = [
+      {
+        id: "1",
+        memberId: "member-1",
+        mood: Mood.GREEN,
+        date: "2026-09-01",
+        text: "Update 1",
+      },
+      {
+        id: "2",
+        memberId: "member-2",
+        mood: Mood.RED,
+        date: "2026-09-02",
+        text: "Update 2",
+      },
+    ];
+
+    mockedUpdateService.getUpdates.mockReturnValue(mockUpdates);
+
     const req = new NextRequest(baseUrl);
+
     const response = await GET(req);
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.updates).toHaveLength(3);
+
+    expect(data).toEqual({
+      updates: mockUpdates,
+    });
+
+    expect(mockedUpdateService.getUpdates).toHaveBeenCalledTimes(1);
   });
 
-  it("filters updates by specific member IDs", async () => {
-    const req = new NextRequest(`${baseUrl}?members=member-1`);
-    const response = await GET(req);
-    const data = await response.json();
+  it("should pass the request URL to the update service", async () => {
+    mockedUpdateService.getUpdates.mockReturnValue([]);
 
-    expect(data.updates).toHaveLength(2);
-    expect(
-      data.updates.every(
-        (u: { memberId: string }) => u.memberId === "member-1",
-      ),
-    ).toBe(true);
-  });
-
-  it("filters updates by multiple member IDs", async () => {
-    const req = new NextRequest(`${baseUrl}?members=member-1&members=member-2`);
-    const response = await GET(req);
-    const data = await response.json();
-
-    expect(data.updates).toHaveLength(3);
-  });
-
-  it("filters updates by mood", async () => {
-    const req = new NextRequest(`${baseUrl}?moods=RED`);
-    const response = await GET(req);
-    const data = await response.json();
-
-    expect(data.updates).toHaveLength(1);
-    expect(data.updates[0].mood).toBe("RED");
-    expect(data.updates[0].id).toBe("3");
-  });
-
-  it("filters updates by date", async () => {
-    const req = new NextRequest(`${baseUrl}?date=2026-09-01`);
-    const response = await GET(req);
-    const data = await response.json();
-
-    expect(data.updates).toHaveLength(2);
-    expect(
-      data.updates.every((u: { date: string }) => u.date === "2026-09-01"),
-    ).toBe(true);
-  });
-
-  it("combines member, mood, and date filters simultaneously", async () => {
     const req = new NextRequest(
       `${baseUrl}?members=member-1&moods=GREEN&date=2026-09-01`,
     );
-    const response = await GET(req);
-    const data = await response.json();
 
-    expect(data.updates).toHaveLength(1);
-    expect(data.updates[0]).toEqual({
-      id: "1",
-      memberId: "member-1",
-      mood: "GREEN",
-      date: "2026-09-01",
-      text: "Update 1",
-    });
-  });
+    await GET(req);
 
-  it("returns an empty array if no updates match the combined filters", async () => {
-    const req = new NextRequest(
-      `${baseUrl}?members=member-2&moods=GREEN&date=2026-09-01`,
-    );
-    const response = await GET(req);
-    const data = await response.json();
+    expect(mockedUpdateService.getUpdates).toHaveBeenCalledTimes(1);
 
-    expect(data.updates).toEqual([]);
+    const passedUrl =
+      mockedUpdateService.getUpdates.mock.calls[0][0];
+
+    expect(passedUrl.searchParams.getAll("members")).toEqual([
+      "member-1",
+    ]);
+
+    expect(passedUrl.searchParams.getAll("moods")).toEqual([
+      "GREEN",
+    ]);
+
+    expect(passedUrl.searchParams.get("date")).toBe("2026-09-01");
   });
 });
 
 describe("POST /api/updates", () => {
   const baseUrl = "http://localhost:3000/api/updates";
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const mockValidUpdate = {
     memberId: "member-1",
@@ -128,60 +95,141 @@ describe("POST /api/updates", () => {
     mood: Mood.RED,
   };
 
-  it("returns successfully when creating new update", async () => {
+  it("should create an update successfully", async () => {
     const req = new NextRequest(baseUrl, {
       method: "POST",
       body: JSON.stringify(mockValidUpdate),
     });
+
     const response = await POST(req);
+    const data = await response.json();
 
     expect(response.status).toBe(200);
+
+    expect(data).toEqual({});
+
+    expect(mockedUpdateService.createUpdate).toHaveBeenCalledWith(
+      mockValidUpdate,
+    );
+
+    expect(mockedUpdateService.createUpdate).toHaveBeenCalledTimes(1);
   });
 
-  describe("returns error when", () => {
-    it("returns error when memberId is invalid", async () => {
+  describe("should return validation error when", () => {
+    it("memberId is missing", async () => {
+      const { memberId, ...invalidUpdate } = mockValidUpdate;
+
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidUpdate, memberId: "-1" }),
+        body: JSON.stringify(invalidUpdate),
       });
+
       const response = await POST(req);
-      expect(response.status).toBe(403);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+
+      expect(data.errors).toBeDefined();
+
+      expect(
+        mockedUpdateService.createUpdate,
+      ).not.toHaveBeenCalled();
     });
 
-    it("returns error when date is invalid", async () => {
+    it("date is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidUpdate, date: "-1" }),
+        body: JSON.stringify({
+          ...mockValidUpdate,
+          date: "-1",
+        }),
       });
+
       const response = await POST(req);
+
       expect(response.status).toBe(400);
+
+      expect(
+        mockedUpdateService.createUpdate,
+      ).not.toHaveBeenCalled();
     });
 
-    it("returns error when date is in correct format but is invalid", async () => {
+    it("date has the correct format but is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidUpdate, date: "2026-15-41" }),
+        body: JSON.stringify({
+          ...mockValidUpdate,
+          date: "2026-15-41",
+        }),
       });
+
       const response = await POST(req);
+
       expect(response.status).toBe(400);
+
+      expect(
+        mockedUpdateService.createUpdate,
+      ).not.toHaveBeenCalled();
     });
 
-    it("returns error when text is invalid", async () => {
+    it("text is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidUpdate, text: "" }),
+        body: JSON.stringify({
+          ...mockValidUpdate,
+          text: "",
+        }),
       });
+
       const response = await POST(req);
+
       expect(response.status).toBe(400);
+
+      expect(
+        mockedUpdateService.createUpdate,
+      ).not.toHaveBeenCalled();
     });
 
-    it("returns error when mood is invalid", async () => {
+    it("mood is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
-        body: JSON.stringify({ ...mockValidUpdate, mood: "WHITE" }),
+        body: JSON.stringify({
+          ...mockValidUpdate,
+          mood: "WHITE",
+        }),
       });
+
       const response = await POST(req);
+
       expect(response.status).toBe(400);
+
+      expect(
+        mockedUpdateService.createUpdate,
+      ).not.toHaveBeenCalled();
     });
+  });
+
+  it("should return 403 when the member does not exist", async () => {
+    mockedUpdateService.createUpdate.mockImplementation(() => {
+      throw new Error("There is no member with the given memberId!");
+    });
+
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidUpdate),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+
+    expect(data).toEqual({
+      errors: "There is no member with the given memberId!",
+    });
+
+    expect(mockedUpdateService.createUpdate).toHaveBeenCalledWith(
+      mockValidUpdate,
+    );
   });
 });

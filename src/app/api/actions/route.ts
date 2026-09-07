@@ -1,8 +1,7 @@
 import { ActionItem } from "@/src/types/action";
 import { NextResponse } from "next/server";
-import { actionItems } from "@/src/data/action";
 import { actionSchema } from "@/src/schema/action";
-import { members } from "@/src/data/member";
+import { actionService } from "@/src/services/action";
 
 type GetResponseData = {
   actions: ActionItem[];
@@ -16,7 +15,8 @@ type PostResponseData = {
 export async function GET(
   req: Request,
 ): Promise<NextResponse<GetResponseData>> {
-  return NextResponse.json({ actions: actionItems });
+  const actions = actionService.getActions();
+  return NextResponse.json({ actions });
 }
 
 export async function POST(
@@ -33,9 +33,10 @@ export async function POST(
     );
   }
 
-  const { ownerId } = data;
-
-  if (!members.find((member) => member.id === ownerId)) {
+  try {
+    const id = actionService.createAction(data);
+    return NextResponse.json({ id }, { status: 200 });
+  } catch (err) {
     return NextResponse.json(
       {
         errors: "There is no member with the given ownerId!",
@@ -43,8 +44,4 @@ export async function POST(
       { status: 403 },
     );
   }
-
-  const actionId = crypto.randomUUID();
-  actionItems.push({ id: actionId, ...data });
-  return NextResponse.json({ id: actionId }, { status: 200 });
 }

@@ -1,5 +1,5 @@
-import { Member } from "../types/member";
-import { getBaseUrl } from "../utils/base-url";
+import { Member } from "@/src/types/member";
+import { getBaseUrl } from "../base-url";
 
 export const memberAPI = {
   async getSingleMember(id: string): Promise<{ member: Member | null }> {

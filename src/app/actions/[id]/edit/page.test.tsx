@@ -3,6 +3,8 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import EditAction from "./page";
 import { ActionStatus } from "@/src/types/action";
 import { toast } from "sonner";
+import { memberAPI } from "@/src/utils/apis/member";
+import { actionAPI } from "@/src/utils/apis/action";
 
 const mockPush = jest.fn();
 
@@ -22,21 +24,18 @@ jest.mock("sonner", () => ({
   },
 }));
 
-jest.mock("@/src/apis/member", () => ({
+jest.mock("@/src/utils/apis/member", () => ({
   memberAPI: {
     getAllMembers: jest.fn(),
   },
 }));
 
-jest.mock("@/src/apis/action", () => ({
+jest.mock("@/src/utils/apis/action", () => ({
   actionAPI: {
     getSingleAction: jest.fn(),
     editAction: jest.fn(),
   },
 }));
-
-import { memberAPI } from "@/src/apis/member";
-import { actionAPI } from "@/src/apis/action";
 
 const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
 const mockedActionAPI = actionAPI as jest.Mocked<typeof actionAPI>;

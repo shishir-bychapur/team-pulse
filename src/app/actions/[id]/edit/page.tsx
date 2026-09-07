@@ -1,8 +1,8 @@
 "use client";
 
 import { ActionForm, actionSchema } from "@/src/schema/action";
-import { actionAPI } from "@/src/apis/action";
-import { memberAPI } from "@/src/apis/member";
+import { actionAPI } from "@/src/utils/apis/action";
+import { memberAPI } from "@/src/utils/apis/member";
 import { ActionItem, ActionStatus } from "@/src/types/action";
 import { Member } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";

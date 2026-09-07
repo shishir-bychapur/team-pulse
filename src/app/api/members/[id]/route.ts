@@ -1,4 +1,4 @@
-import { members } from "@/src/data/member";
+import { memberService } from "@/src/services/member";
 import { Member } from "@/src/types/member";
 import { NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ export async function GET(
   { params }: { params: Promise<RequestParams> },
 ): Promise<NextResponse<ResponseData>> {
   const { id } = await params;
-  const member = members.find((m) => m.id === id);
+  const member = memberService.getMember(id);
   if (!member) {
     return NextResponse.json({ member: null }, { status: 404 });
   }
