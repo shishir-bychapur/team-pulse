@@ -5,6 +5,8 @@ import { Member } from "../../types/member";
 import Link from "next/link";
 import { ActionItem } from "@/src/types/action";
 import ActionCard from "@/src/components/actions/action";
+import { memberAPI } from "@/src/services/member";
+import { actionAPI } from "@/src/services/action";
 
 const Actions = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -13,8 +15,7 @@ const Actions = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/api/members");
-        const data: { members: Member[] } = await response.json();
+        const data = await memberAPI.getAllMembers();
         setMembers(data.members);
       } catch (error) {
         console.error("Error fetching members:", error);
@@ -27,8 +28,7 @@ const Actions = () => {
   useEffect(() => {
     const fetchActions = async () => {
       try {
-        const response = await fetch("/api/actions");
-        const data: { actions: ActionItem[] } = await response.json();
+        const data = await actionAPI.getAllActions();
         setActions(data.actions);
       } catch (error) {
         console.error("Error fetching members:", error);

@@ -1,9 +1,8 @@
-import { Member } from "@/src/types/member";
 import { AllMembers } from "@/src/components/members/all-members";
+import { memberAPI } from "@/src/services/member";
 
 const Members = async () => {
-  const response = await fetch(process.env.URL + "/api/members");
-  const data: { members: Member[] } = await response.json();
+  const data = await memberAPI.getAllMembers();
 
   return (
     <div>

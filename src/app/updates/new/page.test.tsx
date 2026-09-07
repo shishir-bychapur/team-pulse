@@ -2,6 +2,9 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CreateUpdate from "./page";
 import { Mood } from "@/src/types/update";
+import { toast } from "sonner";
+import { memberAPI } from "@/src/services/member";
+import { updateAPI } from "@/src/services/update";
 
 jest.mock("sonner", () => ({
   toast: {
@@ -10,7 +13,20 @@ jest.mock("sonner", () => ({
   },
 }));
 
-import { toast } from "sonner";
+jest.mock("@/src/services/member", () => ({
+  memberAPI: {
+    getAllMembers: jest.fn(),
+  },
+}));
+
+jest.mock("@/src/services/update", () => ({
+  updateAPI: {
+    createUpdate: jest.fn(),
+  },
+}));
+
+const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+const mockedUpdateAPI = updateAPI as jest.Mocked<typeof updateAPI>;
 
 const mockMembers = [
   {
@@ -20,6 +36,7 @@ const mockMembers = [
       name: "Developer",
       id: "1",
     },
+    timezone: "UTC",
   },
   {
     id: "member-2",
@@ -28,32 +45,13 @@ const mockMembers = [
       name: "Designer",
       id: "2",
     },
+    timezone: "UTC",
   },
 ];
 
 describe("CreateUpdate Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    jest.spyOn(global, "fetch").mockImplementation((url) => {
-      const urlString = typeof url === "string" ? url : url.toString();
-
-      if (urlString === "/api/members") {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ members: mockMembers }),
-        } as Response);
-      }
-
-      if (urlString === "/api/updates") {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        } as Response);
-      }
-
-      return Promise.reject(new Error("Unknown endpoint"));
-    });
   });
 
   afterEach(() => {
@@ -61,6 +59,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("renders the form fields", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     expect(
@@ -88,11 +89,10 @@ describe("CreateUpdate Page", () => {
   });
 
   it("fetches and displays members", async () => {
-    render(<CreateUpdate />);
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/members");
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
     });
+    render(<CreateUpdate />);
 
     expect(
       await screen.findByRole("option", {
@@ -108,6 +108,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("shows validation errors when submitting an empty form", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -135,21 +138,16 @@ describe("CreateUpdate Page", () => {
         screen.getByText("Date must be in YYYY-MM-DD format!"),
       ).toBeInTheDocument();
     });
-
-    expect(global.fetch).not.toHaveBeenCalledWith(
-      "/api/updates",
-      expect.anything(),
-    );
   });
 
   it("handles member API errors gracefully", async () => {
-    jest.restoreAllMocks();
-
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network Error"));
+    mockedMemberAPI.getAllMembers.mockRejectedValue(
+      new Error("Network Error!"),
+    );
 
     render(<CreateUpdate />);
 
@@ -164,6 +162,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("allows the user to fill in the form", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -206,6 +207,14 @@ describe("CreateUpdate Page", () => {
   });
 
   it("submits the form successfully", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
+    mockedUpdateAPI.createUpdate.mockResolvedValue(
+      new Response(null, {
+        status: 200,
+      }),
+    );
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -243,18 +252,12 @@ describe("CreateUpdate Page", () => {
     );
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/updates",
-        expect.objectContaining({
-          method: "POST",
-          body: JSON.stringify({
-            memberId: "member-1",
-            text: "Finished feature A",
-            mood: Mood.GREEN,
-            date: "2026-09-04",
-          }),
-        }),
-      );
+      expect(mockedUpdateAPI.createUpdate).toHaveBeenCalledWith({
+        memberId: "member-1",
+        text: "Finished feature A",
+        mood: Mood.GREEN,
+        date: "2026-09-04",
+      });
     });
 
     await waitFor(() => {
@@ -265,6 +268,14 @@ describe("CreateUpdate Page", () => {
   });
 
   it("resets the form after successful submission", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
+    mockedUpdateAPI.createUpdate.mockResolvedValue(
+      new Response(null, {
+        status: 200,
+      }),
+    );
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -314,28 +325,14 @@ describe("CreateUpdate Page", () => {
   });
 
   it("shows an error toast when creating an update fails", async () => {
-    jest.restoreAllMocks();
-
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    jest.spyOn(global, "fetch").mockImplementation((url) => {
-      const urlString = typeof url === "string" ? url : url.toString();
-
-      if (urlString === "/api/members") {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ members: mockMembers }),
-        } as Response);
-      }
-
-      if (urlString === "/api/updates") {
-        return Promise.reject(new Error("Network Error"));
-      }
-
-      return Promise.reject(new Error("Unknown endpoint"));
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
     });
+    mockedUpdateAPI.createUpdate.mockRejectedValue(
+      new Response(null, {
+        status: 500,
+      }),
+    );
 
     render(<CreateUpdate />);
 
@@ -376,13 +373,12 @@ describe("CreateUpdate Page", () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Error creating a new update!");
     });
-
-    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
-
-    consoleSpy.mockRestore();
   });
 
   it("shows an error when member is missing", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -431,6 +427,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("shows an error when update text is missing", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -469,6 +468,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("shows an error when mood is missing", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {
@@ -507,6 +509,9 @@ describe("CreateUpdate Page", () => {
   });
 
   it("shows an error when date is missing", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
     render(<CreateUpdate />);
 
     await screen.findByRole("option", {

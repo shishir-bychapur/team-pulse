@@ -57,8 +57,11 @@ describe("POST /api/actions", () => {
       body: JSON.stringify(mockValidAction),
     });
     const response = await POST(req);
+    const data = await response.json();
 
     expect(response.status).toBe(200);
+    expect(data.id).toEqual(expect.any(String));
+    expect(data.errors).toEqual(undefined);
   });
 
   describe("returns error when", () => {
@@ -68,7 +71,12 @@ describe("POST /api/actions", () => {
         body: JSON.stringify({ ...mockValidAction, ownerId: "-1" }),
       });
       const response = await POST(req);
+      const data = await response.json();
       expect(response.status).toBe(403);
+      expect(data.id).toEqual(undefined);
+      expect(data.errors).toContain(
+        "There is no member with the given ownerId!",
+      );
     });
 
     it("returns error when title is invalid", async () => {
@@ -77,7 +85,10 @@ describe("POST /api/actions", () => {
         body: JSON.stringify({ ...mockValidAction, title: "" }),
       });
       const response = await POST(req);
+      const data = await response.json();
       expect(response.status).toBe(400);
+      expect(data.id).toEqual(undefined);
+      expect(data.errors).toContain("Title cannot be empty!");
     });
 
     it("returns error when due date is in correct format but is invalid", async () => {
@@ -86,7 +97,10 @@ describe("POST /api/actions", () => {
         body: JSON.stringify({ ...mockValidAction, dueDate: "2026-15-41" }),
       });
       const response = await POST(req);
+      const data = await response.json();
       expect(response.status).toBe(400);
+      expect(data.id).toEqual(undefined);
+      expect(data.errors).toContain("Invalid date!");
     });
 
     it("returns error when due date is invalid", async () => {
@@ -95,7 +109,10 @@ describe("POST /api/actions", () => {
         body: JSON.stringify({ ...mockValidAction, dueDate: "2026" }),
       });
       const response = await POST(req);
+      const data = await response.json();
       expect(response.status).toBe(400);
+      expect(data.id).toEqual(undefined);
+      expect(data.errors).toContain("Date must be in YYYY-MM-DD format!");
     });
 
     it("returns error when status is invalid", async () => {
@@ -104,7 +121,10 @@ describe("POST /api/actions", () => {
         body: JSON.stringify({ ...mockValidAction, status: "PENDING" }),
       });
       const response = await POST(req);
+      const data = await response.json();
       expect(response.status).toBe(400);
+      expect(data.id).toEqual(undefined);
+      expect(data.errors).toContain("Status must be of type Open or Closed!");
     });
   });
 });

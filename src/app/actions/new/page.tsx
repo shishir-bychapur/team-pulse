@@ -7,15 +7,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { memberAPI } from "@/src/services/member";
+import { actionAPI } from "@/src/services/action";
 
 export default function CreateAction() {
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/api/members");
-        const data: { members: Member[] } = await response.json();
+        const data = await memberAPI.getAllMembers();
         setMembers(data.members);
       } catch (error) {
         console.error("Error fetching members:", error);
@@ -29,7 +32,6 @@ export default function CreateAction() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<ActionForm>({
     resolver: zodResolver(actionSchema),
     defaultValues: {
@@ -42,14 +44,12 @@ export default function CreateAction() {
 
   const onSubmit = async (data: ActionForm) => {
     try {
-      const response = await fetch("/api/actions", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await actionAPI.createAction(data);
 
       if (response.ok) {
-        reset();
         toast.success("Successfully created the action!");
+        const data: { id: string } = await response.json();
+        router.push(`/actions/${data.id}`);
       }
     } catch (error) {
       console.error(error);

@@ -9,6 +9,7 @@ type GetResponseData = {
 };
 
 type PostResponseData = {
+  id?: string;
   errors?: string;
 };
 
@@ -43,6 +44,7 @@ export async function POST(
     );
   }
 
-  actionItems.push({ id: crypto.randomUUID(), ...data });
-  return NextResponse.json({}, { status: 200 });
+  const actionId = crypto.randomUUID();
+  actionItems.push({ id: actionId, ...data });
+  return NextResponse.json({ id: actionId }, { status: 200 });
 }

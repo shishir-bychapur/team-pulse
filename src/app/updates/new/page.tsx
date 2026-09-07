@@ -2,6 +2,8 @@
 
 import { moods } from "@/src/data/update";
 import { UpdateForm, updateSchema } from "@/src/schema/update";
+import { memberAPI } from "@/src/services/member";
+import { updateAPI } from "@/src/services/update";
 import { Member } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -14,8 +16,7 @@ export default function CreateUpdate() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/api/members");
-        const data: { members: Member[] } = await response.json();
+        const data = await memberAPI.getAllMembers();
         setMembers(data.members);
       } catch (error) {
         console.error("Error fetching members:", error);
@@ -42,10 +43,7 @@ export default function CreateUpdate() {
 
   const onSubmit = async (data: UpdateForm) => {
     try {
-      const response = await fetch("/api/updates", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await updateAPI.createUpdate(data);
 
       if (response.ok) {
         reset();

@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { Member } from "../../types/member";
 import { Update } from "../../types/update";
 import Link from "next/link";
+import { memberAPI } from "@/src/services/member";
+import { updateAPI } from "@/src/services/update";
 
 const Updates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
@@ -19,8 +21,7 @@ const Updates = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/api/members");
-        const data: { members: Member[] } = await response.json();
+        const data = await memberAPI.getAllMembers();
         setMembers(data.members);
       } catch (error) {
         console.error("Error fetching members:", error);
@@ -47,8 +48,7 @@ const Updates = () => {
     const fetchUpdates = async () => {
       try {
         const params = addParams();
-        const response = await fetch("/api/updates?" + params);
-        const data: { updates: Update[] } = await response.json();
+        const data = await updateAPI.getUpdates(params);
         setUpdates(data.updates);
       } catch (error) {
         console.error("Error fetching updates:", error);

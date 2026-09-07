@@ -3,9 +3,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import SingleMember from "./single-member";
 import { useParams } from "next/navigation";
 import { members } from "../../data/member";
+import { memberAPI } from "@/src/services/member";
 
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
+}));
+
+jest.mock("@/src/services/member", () => ({
+  memberAPI: {
+    getSingleMember: jest.fn(),
+  },
 }));
 
 jest.mock("../loader/skeleton-loader", () => ({
@@ -23,21 +30,24 @@ jest.mock("../alert/alert", () => ({
   ),
 }));
 
+const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+const mockedUseParams = useParams as jest.Mock;
+
 describe("SingleMember Component", () => {
   const mockMember = members[0];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useParams as jest.Mock).mockReturnValue({ id: members[0].id });
-    global.fetch = jest.fn();
-  });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+    mockedUseParams.mockReturnValue({
+      id: mockMember.id,
+    });
   });
 
   it("renders the SkeletonLoader initially while fetching data", () => {
-    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    mockedMemberAPI.getSingleMember.mockImplementation(
+      () => new Promise(() => {}),
+    );
 
     render(<SingleMember />);
 
@@ -45,8 +55,8 @@ describe("SingleMember Component", () => {
   });
 
   it("fetches and renders member details successfully", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      json: jest.fn().mockResolvedValueOnce({ member: mockMember }),
+    mockedMemberAPI.getSingleMember.mockResolvedValue({
+      member: mockMember,
     });
 
     render(<SingleMember />);
@@ -55,17 +65,23 @@ describe("SingleMember Component", () => {
       expect(screen.queryByTestId("skeleton-loader")).not.toBeInTheDocument();
     });
 
-    expect(global.fetch).toHaveBeenCalledWith("/api/members/1");
+    expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith(mockMember.id);
+
     expect(
-      screen.getByRole("heading", { level: 2, name: members[0].name }),
+      screen.getByRole("heading", {
+        level: 2,
+        name: mockMember.name,
+      }),
     ).toBeInTheDocument();
-    expect(screen.getByText(members[0].role.name)).toBeInTheDocument();
-    expect(screen.getByText(members[0].timezone)).toBeInTheDocument();
+
+    expect(screen.getByText(mockMember.role.name)).toBeInTheDocument();
+
+    expect(screen.getByText(mockMember.timezone)).toBeInTheDocument();
   });
 
-  it("renders the Alert component when member is not found (null response)", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      json: jest.fn().mockResolvedValueOnce({ member: null }),
+  it("renders the Alert component when member is not found", async () => {
+    mockedMemberAPI.getSingleMember.mockResolvedValue({
+      member: null,
     });
 
     render(<SingleMember />);
@@ -75,16 +91,20 @@ describe("SingleMember Component", () => {
     });
 
     expect(screen.getByText("Member not found!")).toBeInTheDocument();
+
     expect(
       screen.getByText("The requested member could not be found."),
     ).toBeInTheDocument();
+
+    expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith(mockMember.id);
   });
 
-  it("renders the Alert component when the fetch API throws an error", async () => {
+  it("renders the Alert component when memberAPI throws an error", async () => {
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    (global.fetch as jest.Mock).mockRejectedValueOnce(
+
+    mockedMemberAPI.getSingleMember.mockRejectedValue(
       new Error("Network Error"),
     );
 
