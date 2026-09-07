@@ -1,7 +1,14 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Members from "./page";
+import { memberAPI } from "@/src/services/member";
 import { Member } from "@/src/types/member";
+
+jest.mock("@/src/services/member", () => ({
+  memberAPI: {
+    getAllMembers: jest.fn(),
+  },
+}));
 
 jest.mock("@/src/components/members/all-members", () => ({
   AllMembers: function MockAllMembers({ members }: { members: Member[] }) {
@@ -15,41 +22,40 @@ jest.mock("@/src/components/members/all-members", () => ({
   },
 }));
 
+const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+
 const mockMembers = [
   { id: "1", name: "Alice" },
   { id: "2", name: "Bob" },
-];
+] as Member[];
 
 describe("Members Page", () => {
   beforeEach(() => {
-    jest.spyOn(global, "fetch").mockImplementation((url) => {
-      if (url === "http://localhost:3000/api/members") {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ members: mockMembers }),
-        } as Response);
-      }
-      return Promise.reject(new Error("Unknown endpoint"));
-    });
+    jest.clearAllMocks();
   });
 
   it("fetches member data and renders title along with AllMembers component", async () => {
+    mockedMemberAPI.getAllMembers.mockResolvedValue({
+      members: mockMembers,
+    });
+
     const ResolvedMembers = await Members();
     render(ResolvedMembers);
 
-    expect(screen.getByText("Members")).toBeInTheDocument();
+    expect(mockedMemberAPI.getAllMembers).toHaveBeenCalledTimes(1);
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:3000/api/members",
-    );
+    expect(
+      screen.getByRole("heading", { name: "Members" }),
+    ).toBeInTheDocument();
 
     expect(screen.getByTestId("all-members")).toBeInTheDocument();
+
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });
 
-  it("handles fetch or network errors gracefully", async () => {
-    jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network Error"));
+  it("throws an error when memberAPI fails", async () => {
+    mockedMemberAPI.getAllMembers.mockRejectedValue(new Error("Network Error"));
 
     await expect(Members()).rejects.toThrow("Network Error");
   });

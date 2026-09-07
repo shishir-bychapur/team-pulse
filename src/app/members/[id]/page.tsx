@@ -1,4 +1,4 @@
-import { Member } from "@/src/types/member";
+import { memberAPI } from "@/src/services/member";
 import { notFound } from "next/navigation";
 
 export default async function MemberPage({
@@ -7,8 +7,7 @@ export default async function MemberPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const response = await fetch(process.env.URL + `/api/members/${id}`);
-  const data: { member: Member | null } = await response.json();
+  const data = await memberAPI.getSingleMember(id);
 
   if (!data.member) {
     return notFound();

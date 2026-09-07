@@ -6,17 +6,17 @@ import { useParams } from "next/navigation";
 import { Member } from "@/src/types/member";
 import SkeletonLoader from "../loader/skeleton-loader";
 import Alert from "../alert/alert";
+import { memberAPI } from "@/src/services/member";
 
 export default function SingleMember() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const response = await fetch(`/api/members/${id}`);
-        const data = await response.json();
+        const data = await memberAPI.getSingleMember(id);
         setMember(data.member);
       } catch (error) {
         console.error("Error fetching member:", error);
