@@ -11,3 +11,52 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+enum Mood {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum ActionStatus {
+  OPEN
+  CLOSED
+}
+
+model Role {
+  id      String   @id
+  name    String   @unique
+  members Member[]
+}
+
+model Member {
+  id       String       @id
+  name     String
+  timezone String
+
+  roleId String
+  role   Role @relation(fields: [roleId], references: [id])
+
+  updates Update[]
+  actions ActionItem[]
+}
+
+model Update {
+  id       String @id
+  memberId String
+  date     String
+  text     String
+  mood     Mood
+
+  member Member @relation(fields: [memberId], references: [id])
+}
+
+model ActionItem {
+  id      String       @id
+  title   String
+  ownerId String
+  status  ActionStatus
+  dueDate String
+
+  owner Member @relation(fields: [ownerId], references: [id])
+}
