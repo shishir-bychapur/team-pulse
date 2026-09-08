@@ -79,6 +79,21 @@ describe("GET /api/actions", () => {
 
     expect(mockedActionService.getActions).toHaveBeenCalledTimes(1);
   });
+
+  it("should return 401 if user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+
+    mockedActionService.getActions.mockReturnValue([]);
+    const req = new NextRequest(baseUrl);
+
+    const response = await GET(req);
+
+    expect(response.status).toBe(401);
+    expect(mockedActionService.getActions).toHaveBeenCalledTimes(0);
+  });
 });
 
 describe("POST /api/actions", () => {
@@ -86,6 +101,10 @@ describe("POST /api/actions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   const mockValidAction = {
@@ -232,5 +251,22 @@ describe("POST /api/actions", () => {
     expect(mockedActionService.createAction).toHaveBeenCalledWith(
       mockValidAction,
     );
+  });
+
+  it("should return 401 if user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+
+    mockedActionService.createAction.mockReturnValue("generated-action-id");
+
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidAction),
+    });
+    const response = await POST(req);
+
+    expect(response.status).toBe(401);
   });
 });

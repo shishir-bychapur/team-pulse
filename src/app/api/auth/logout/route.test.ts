@@ -48,4 +48,20 @@ describe("GET /auth/logout", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({});
   });
+
+  it("should return 401 if user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+    (authService.logout as jest.Mock).mockResolvedValue(undefined);
+
+    const req = new NextRequest("http://localhost:3000/api/auth/logout", {
+      method: "GET",
+    });
+
+    const response = await GET(req);
+
+    expect(response.status).toBe(401);
+  });
 });

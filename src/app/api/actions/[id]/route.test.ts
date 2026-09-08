@@ -77,6 +77,19 @@ describe("GET /api/actions/[id]", () => {
 
     expect(mockedActionService.getAction).toHaveBeenCalledWith("invalid-id");
   });
+
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+    const req = new NextRequest(`${baseUrl}/act-1`);
+    const params = Promise.resolve({ id: "act-1" });
+
+    const response = await GET(req, { params });
+
+    expect(response.status).toBe(401);
+  });
 });
 
 describe("PATCH /api/actions/[id]", () => {
@@ -120,6 +133,24 @@ describe("PATCH /api/actions/[id]", () => {
     );
 
     expect(mockedActionService.editAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+
+    const req = new NextRequest(`${baseUrl}/act-1`, {
+      method: "PATCH",
+      body: JSON.stringify(mockValidAction),
+    });
+
+    const params = Promise.resolve({ id: "act-1" });
+
+    const response = await PATCH(req, { params });
+
+    expect(response.status).toBe(401);
   });
 
   describe("should return validation error when", () => {
