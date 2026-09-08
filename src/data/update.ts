@@ -1,4 +1,5 @@
-import { Mood, Update } from "../types/update";
+import { Update } from "../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 export const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
 

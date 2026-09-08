@@ -1,4 +1,5 @@
-import { ActionItem, ActionStatus } from "../types/action";
+import { ActionItem } from "../types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 
 export const actionItems: ActionItem[] = [
   {

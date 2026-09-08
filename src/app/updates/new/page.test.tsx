@@ -1,10 +1,10 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CreateUpdate from "./page";
-import { Mood } from "@/src/types/update";
 import { toast } from "sonner";
 import { memberAPI } from "@/src/utils/apis/member";
 import { updateAPI } from "@/src/utils/apis/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("sonner", () => ({
   toast: {

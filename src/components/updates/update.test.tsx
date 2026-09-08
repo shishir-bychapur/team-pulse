@@ -1,7 +1,8 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import UpdateCard from "./update";
-import { Update, Mood } from "../../types/update";
+import { Update } from "../../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("../badge/badge", () => ({
   __esModule: true,

@@ -1,29 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Member } from "../../types/member";
 import Link from "next/link";
-import { ActionItem } from "@/src/types/action";
+import { ActionItemWithOwner } from "@/src/types/action";
 import ActionCard from "@/src/components/actions/action";
-import { memberAPI } from "@/src/utils/apis/member";
 import { actionAPI } from "@/src/utils/apis/action";
 
 const Actions = () => {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [actions, setActions] = useState<ActionItem[]>([]);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const data = await memberAPI.getAllMembers();
-        setMembers(data.members);
-      } catch (error) {
-        console.error("Error fetching members:", error);
-      }
-    };
-
-    fetchMembers();
-  }, []);
+  const [actions, setActions] = useState<ActionItemWithOwner[]>([]);
 
   useEffect(() => {
     const fetchActions = async () => {
@@ -81,13 +65,11 @@ const Actions = () => {
           </div>
         ) : (
           <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {actions.map((action: ActionItem) => (
+            {actions.map((action: ActionItemWithOwner) => (
               <ActionCard
                 key={action.id}
                 action={action}
-                memberName={
-                  members.find((m) => m.id === action.ownerId)?.name || ""
-                }
+                memberName={action.owner.name}
               />
             ))}
           </ul>

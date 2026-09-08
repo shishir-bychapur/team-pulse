@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Mood } from "../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 export const updateSchema = z.object({
   memberId: z.string().nonempty("Member is invalid!"),

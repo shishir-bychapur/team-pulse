@@ -1,20 +1,30 @@
-import { updates } from "../data/update";
-import { Update } from "../types/update";
+import { prisma } from "@/prisma/prisma";
+import { Mood } from "@/generated/prisma/enums";
+import { Update } from "@/generated/prisma/client";
 
 export const updateRepository = {
-  getUpdates: (
+  getUpdates: async (
     filteredMembers: string[],
-    filteredMoods: string[],
+    filteredMoods: Mood[],
     filteredDate: string | null,
-  ): Update[] => {
-    return updates.filter(
-      (update) =>
-        filteredMembers.includes(update.memberId) &&
-        filteredMoods.includes(update.mood) &&
-        (!filteredDate || update.date === filteredDate),
-    );
+  ): Promise<Update[]> => {
+    return await prisma.update.findMany({
+      where: {
+        memberId: {
+          in: filteredMembers,
+        },
+        mood: {
+          in: filteredMoods,
+        },
+        ...(filteredDate && {
+          date: filteredDate,
+        }),
+      },
+    });
   },
-  createUpdate: (update: Update): void => {
-    updates.push(update);
+  createUpdate: async (update: Update): Promise<void> => {
+    await prisma.update.create({
+      data: update,
+    });
   },
 };

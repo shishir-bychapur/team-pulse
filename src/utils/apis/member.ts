@@ -1,13 +1,15 @@
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 import { getBaseUrl } from "../base-url";
 
 export const memberAPI = {
-  async getSingleMember(id: string): Promise<{ member: Member | null }> {
+  async getSingleMember(
+    id: string,
+  ): Promise<{ member: MemberWithRole | null }> {
     const response = await fetch(getBaseUrl() + `/api/members/${id}`);
     return await response.json();
   },
 
-  async getAllMembers(): Promise<{ members: Member[] }> {
+  async getAllMembers(): Promise<{ members: MemberWithRole[] }> {
     const response = await fetch(getBaseUrl() + `/api/members`);
     return await response.json();
   },

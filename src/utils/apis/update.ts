@@ -1,5 +1,5 @@
 import { UpdateForm } from "@/src/schema/update";
-import { Update } from "@/src/types/update";
+import { Update } from "@/generated/prisma/client";
 import { getBaseUrl } from "../base-url";
 
 export const updateAPI = {

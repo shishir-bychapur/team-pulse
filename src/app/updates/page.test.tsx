@@ -8,9 +8,10 @@ import {
 } from "@testing-library/react";
 import Updates from "./page";
 import { Dispatch, SetStateAction } from "react";
-import { Mood, Update } from "@/src/types/update";
+import { Update } from "@/src/types/update";
 import { memberAPI } from "@/src/utils/apis/member";
 import { updateAPI } from "@/src/utils/apis/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("../../components/filters/member-filter", () => {
   return function MockMemberFilter({

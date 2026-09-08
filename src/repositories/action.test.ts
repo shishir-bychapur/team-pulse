@@ -1,6 +1,7 @@
-import { ActionStatus, ActionItem } from "../types/action";
+import { ActionItem } from "../types/action";
 import { actionRepository } from "./action";
 import { actionItems } from "../data/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 
 const mockActionItems: ActionItem[] = [
   {

@@ -1,4 +1,4 @@
-import { Update } from "../../../types/update";
+import { Update } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { updateSchema } from "@/src/schema/update";
 import { updateService } from "@/src/services/update";
@@ -23,7 +23,7 @@ export async function GET(
       { status: 401 },
     );
   }
-  const updates = updateService.getUpdates(new URL(req.url));
+  const updates = await updateService.getUpdates(new URL(req.url));
 
   return NextResponse.json({
     updates,
@@ -52,7 +52,7 @@ export async function POST(
   }
 
   try {
-    updateService.createUpdate(data);
+    await updateService.createUpdate(data);
     return NextResponse.json({}, { status: 200 });
   } catch (err) {
     return NextResponse.json(

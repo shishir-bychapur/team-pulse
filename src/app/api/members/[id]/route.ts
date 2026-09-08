@@ -1,5 +1,5 @@
 import { memberService } from "@/src/services/member";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 import { NextResponse } from "next/server";
 
 type RequestParams = {
@@ -7,7 +7,7 @@ type RequestParams = {
 };
 
 type ResponseData = {
-  member: Member | null;
+  member: MemberWithRole | null;
 };
 
 export async function GET(
@@ -15,9 +15,9 @@ export async function GET(
   { params }: { params: Promise<RequestParams> },
 ): Promise<NextResponse<ResponseData>> {
   const { id } = await params;
-  const member = memberService.getMember(id);
+  const member = await memberService.getMember(id);
   if (!member) {
-    return NextResponse.json({ member: null }, { status: 404 });
+    return NextResponse.json({ member }, { status: 404 });
   }
   return NextResponse.json({ member });
 }

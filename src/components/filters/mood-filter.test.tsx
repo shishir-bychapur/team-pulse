@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import MoodFilter from "./mood-filter";
-import { Mood } from "../../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("../input/checkbox", () => ({
   __esModule: true,

@@ -1,11 +1,19 @@
-import { members } from "../data/member";
-import { Member } from "../types/member";
+import { prisma } from "@/prisma/prisma";
+import { MemberWithRole } from "../types/member";
 
 export const memberRepository = {
-  getMembers: (): Member[] => {
-    return members;
+  getMembers: async (): Promise<MemberWithRole[]> => {
+    return await prisma.member.findMany({
+      include: {
+        role: true,
+      },
+    });
   },
-  getMember: (id: string): Member | undefined => {
-    return members.find((member) => member.id === id);
+  getMember: async (id: string): Promise<MemberWithRole | null> => {
+    return await prisma.member.findFirst({
+      include: {
+        role: true,
+      },
+    });
   },
 };

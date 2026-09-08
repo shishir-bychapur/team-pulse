@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionForm, actionSchema } from "@/src/schema/action";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { Member } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";

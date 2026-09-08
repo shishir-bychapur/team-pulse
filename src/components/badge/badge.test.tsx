@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Badge from "./badge";
-import { Mood } from "../../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 describe("Badge", () => {
   it("renders with the correct style for red mood", () => {

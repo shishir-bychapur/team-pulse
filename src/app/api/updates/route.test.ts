@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { Mood, Update } from "@/src/types/update";
 import { updateService } from "@/src/services/update";
 import { verifySession } from "@/src/utils/session";
+import { Mood } from "@/generated/prisma/enums";
+import { Update } from "@/generated/prisma/client";
 
 jest.mock("@/src/services/update", () => ({
   updateService: {

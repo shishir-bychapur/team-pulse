@@ -1,5 +1,5 @@
 import { actionService } from "@/src/services/action";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { verifySession } from "@/src/utils/session";
 import { NextResponse } from "next/server";
 
@@ -26,7 +26,7 @@ export async function GET(
   ) {
     return NextResponse.json({ error: "Invalid status." }, { status: 400 });
   }
-  const count = actionService.getActionsByStatus(status as ActionStatus).length;
+  const count = await actionService.getActionsByStatus(status as ActionStatus);
 
   return NextResponse.json({ count });
 }

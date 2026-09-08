@@ -1,4 +1,4 @@
-import { Mood } from "../../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 export default function Badge({ mood }: { mood: Mood }) {
   if (mood === Mood.RED) {

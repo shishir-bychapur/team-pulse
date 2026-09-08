@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import ActionPage from "./page";
 import { actionAPI } from "@/src/utils/apis/action";
 import { memberAPI } from "@/src/utils/apis/member";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { notFound } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -106,7 +106,7 @@ describe("ActionPage", () => {
 
     render(component);
 
-    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.getByText("OPEN")).toBeInTheDocument();
   });
 
   it("renders the CLOSED status when the action is closed", async () => {
@@ -125,7 +125,7 @@ describe("ActionPage", () => {
 
     render(component);
 
-    expect(screen.getByText("Closed")).toBeInTheDocument();
+    expect(screen.getByText("CLOSED")).toBeInTheDocument();
   });
 
   it("renders the action owner name", async () => {

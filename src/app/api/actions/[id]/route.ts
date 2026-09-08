@@ -25,9 +25,9 @@ export async function GET(
     );
   }
   const { id } = await params;
-  const action = actionService.getAction(id);
+  const action = await actionService.getAction(id);
   if (!action) {
-    return NextResponse.json({ action: null }, { status: 404 });
+    return NextResponse.json({ action }, { status: 404 });
   }
 
   return NextResponse.json({ action });
@@ -58,15 +58,15 @@ export async function PATCH(
   const { id } = await params;
 
   try {
-    const index = actionService.editAction(id, data);
-    if (index === -1) {
-      return NextResponse.json(
-        {
-          errors: "There is no action item with the given id!",
-        },
-        { status: 404 },
-      );
-    }
+    await actionService.editAction(id, data);
+    // if (index === -1) {
+    //   return NextResponse.json(
+    //     {
+    //       errors: "There is no action item with the given id!",
+    //     },
+    //     { status: 404 },
+    //   );
+    // }
     return NextResponse.json({}, { status: 200 });
   } catch (err) {
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { ActionItem, ActionStatus } from "@/src/types/action";
+import { ActionItem } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
 
@@ -48,7 +49,7 @@ describe("GET /api/actions", () => {
       },
     ];
 
-    mockedActionService.getActions.mockReturnValue(mockActions);
+    mockedActionService.getActions.mockReturnValue(Promise.resolve(mockActions));
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);
@@ -64,7 +65,7 @@ describe("GET /api/actions", () => {
   });
 
   it("should return an empty array when there are no actions", async () => {
-    mockedActionService.getActions.mockReturnValue([]);
+    mockedActionService.getActions.mockReturnValue(Promise.resolve([]));
 
     const req = new NextRequest(baseUrl);
 
@@ -86,7 +87,7 @@ describe("GET /api/actions", () => {
       username: null,
     });
 
-    mockedActionService.getActions.mockReturnValue([]);
+    mockedActionService.getActions.mockReturnValue(Promise.resolve([]));
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);

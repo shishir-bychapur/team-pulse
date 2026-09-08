@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CreateAction from "./page";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { toast } from "sonner";
 import { memberAPI } from "@/src/utils/apis/member";
 import { actionAPI } from "@/src/utils/apis/action";

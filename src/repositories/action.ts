@@ -1,21 +1,44 @@
-import { actionItems } from "../data/action";
-import { ActionItem } from "../types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
+import { ActionItem, ActionItemWithOwner } from "../types/action";
+import { prisma } from "@/prisma/prisma";
 
 export const actionRepository = {
-  getActions: (): ActionItem[] => {
-    return actionItems;
+  getActions: async (): Promise<ActionItemWithOwner[]> => {
+    return await prisma.actionItem.findMany({
+      include: {
+        owner: true,
+      },
+    });
   },
-  getAction: (id: string): ActionItem | undefined => {
-    return actionItems.find((actionItem) => actionItem.id === id);
+  getAction: async (id: string): Promise<ActionItemWithOwner | null> => {
+    return await prisma.actionItem.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        owner: true,
+      },
+    });
   },
-  createAction: (actionItem: ActionItem): void => {
-    actionItems.push(actionItem);
+  createAction: async (actionItem: ActionItem): Promise<void> => {
+    await prisma.actionItem.create({
+      data: actionItem,
+    });
   },
-  editAction: (id: string, newActionItem: ActionItem): number => {
-    const index = actionItems.findIndex((actionItem) => actionItem.id === id);
-    if (index !== -1) {
-      actionItems[index] = { ...newActionItem, id };
-    }
-    return index;
+  editAction: async (id: string, newActionItem: ActionItem): Promise<void> => {
+    await prisma.actionItem.update({
+      where: {
+        id,
+        ownerId: newActionItem.ownerId,
+      },
+      data: newActionItem,
+    });
+  },
+  countActionsByStatus: async (status: ActionStatus): Promise<number> => {
+    return await prisma.actionItem.count({
+      where: {
+        status,
+      },
+    });
   },
 };

@@ -1,11 +1,11 @@
-import { ActionItem } from "@/src/types/action";
+import { ActionItemWithOwner } from "@/src/types/action";
 import { NextResponse } from "next/server";
 import { actionSchema } from "@/src/schema/action";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
 
 type GetResponseData = {
-  actions?: ActionItem[];
+  actions?: ActionItemWithOwner[];
   error?: string;
 };
 
@@ -25,7 +25,7 @@ export async function GET(
     );
   }
 
-  const actions = actionService.getActions();
+  const actions = await actionService.getActions();
   return NextResponse.json({ actions });
 }
 
@@ -51,9 +51,10 @@ export async function POST(
   }
 
   try {
-    const id = actionService.createAction(data);
+    const id = await actionService.createAction(data);
     return NextResponse.json({ id }, { status: 200 });
   } catch (err) {
+    console.log(err);
     return NextResponse.json(
       {
         errors: "There is no member with the given ownerId!",

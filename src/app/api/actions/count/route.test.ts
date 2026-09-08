@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "./route";
-import { ActionItem, ActionStatus } from "@/src/types/action";
+import { ActionItem } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
 

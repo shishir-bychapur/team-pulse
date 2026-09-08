@@ -1,7 +1,8 @@
 import { updateService } from "./update";
 import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
-import { Mood, Update } from "../types/update";
+import { Update } from "../types/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("../repositories/member", () => ({
   memberRepository: {

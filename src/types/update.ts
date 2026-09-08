@@ -1,8 +1,4 @@
-export enum Mood {
-  GREEN = "Green",
-  YELLOW = "Yellow",
-  RED = "Red",
-}
+import { Mood } from "@/generated/prisma/enums";
 
 export interface Update {
   id: string;

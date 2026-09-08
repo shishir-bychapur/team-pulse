@@ -1,6 +1,6 @@
-import { Mood } from "../types/update";
 import { updateRepository } from "./update";
 import { updates } from "../data/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("@/src/data/update", () => ({
   moods: ["RED", "YELLOW", "GREEN"],
