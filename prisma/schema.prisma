@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,17 +5,6 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-}
-
-enum Mood {
-  GREEN
-  YELLOW
-  RED
-}
-
-enum ActionStatus {
-  OPEN
-  CLOSED
 }
 
 model Role {
@@ -33,12 +17,10 @@ model Member {
   id       String       @id
   name     String
   timezone String
-
-  roleId String
-  role   Role @relation(fields: [roleId], references: [id])
-
-  updates Update[]
-  actions ActionItem[]
+  roleId   String
+  actions  ActionItem[]
+  role     Role         @relation(fields: [roleId], references: [id])
+  updates  Update[]
 }
 
 model Update {
@@ -47,8 +29,7 @@ model Update {
   date     String
   text     String
   mood     Mood
-
-  member Member @relation(fields: [memberId], references: [id])
+  member   Member @relation(fields: [memberId], references: [id])
 }
 
 model ActionItem {
@@ -57,6 +38,16 @@ model ActionItem {
   ownerId String
   status  ActionStatus
   dueDate String
+  owner   Member       @relation(fields: [ownerId], references: [id])
+}
 
-  owner Member @relation(fields: [ownerId], references: [id])
+enum Mood {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum ActionStatus {
+  OPEN
+  CLOSED
 }
