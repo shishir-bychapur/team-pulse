@@ -1,6 +1,6 @@
 import { actionRepository } from "../repositories/action";
 import { memberRepository } from "../repositories/member";
-import { ActionItem } from "../types/action";
+import { ActionItem, ActionStatus } from "../types/action";
 
 export const actionService = {
   getActions: (): ActionItem[] => {
@@ -8,6 +8,11 @@ export const actionService = {
   },
   getAction: (id: string): ActionItem | undefined => {
     return actionRepository.getAction(id);
+  },
+  getActionsByStatus: (status: ActionStatus): ActionItem[] => {
+    return actionRepository
+      .getActions()
+      .filter((action) => action.status === status);
   },
   createAction: (actionItem: ActionItem): string => {
     if (!memberRepository.getMember(actionItem.ownerId)) {

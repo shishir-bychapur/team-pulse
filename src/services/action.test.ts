@@ -70,9 +70,7 @@ describe("Action Service", () => {
 
       expect(result).toEqual(mockAction);
 
-      expect(mockedActionRepository.getAction).toHaveBeenCalledWith(
-        "action-1",
-      );
+      expect(mockedActionRepository.getAction).toHaveBeenCalledWith("action-1");
     });
 
     it("should return undefined when the action does not exist", () => {
@@ -85,6 +83,47 @@ describe("Action Service", () => {
       expect(mockedActionRepository.getAction).toHaveBeenCalledWith(
         "invalid-id",
       );
+    });
+  });
+
+  describe("Get Actions By Status", () => {
+    it("should return open actions", () => {
+      const closedMockAction = {
+        id: "action-2",
+        title: "Update documentation",
+        ownerId: "member-2",
+        status: ActionStatus.OPEN,
+        dueDate: "2026-09-15",
+      };
+      const mockActions: ActionItem[] = [mockAction, closedMockAction];
+
+      mockedActionRepository.getActions.mockReturnValue(mockActions);
+
+      const result = actionService.getActionsByStatus(ActionStatus.OPEN);
+
+      expect(result.length).toBe(2);
+      expect(result[0].status).toBe(ActionStatus.OPEN);
+      expect(result[1].status).toBe(ActionStatus.OPEN);
+      expect(mockedActionRepository.getActions).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return closed actions", () => {
+      const closedMockAction = {
+        id: "action-2",
+        title: "Update documentation",
+        ownerId: "member-2",
+        status: ActionStatus.CLOSED,
+        dueDate: "2026-09-15",
+      };
+      const mockActions: ActionItem[] = [mockAction, closedMockAction];
+
+      mockedActionRepository.getActions.mockReturnValue(mockActions);
+
+      const result = actionService.getActionsByStatus(ActionStatus.CLOSED);
+
+      expect(result.length).toBe(1);
+      expect(result[0].status).toBe(ActionStatus.CLOSED);
+      expect(mockedActionRepository.getActions).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -102,15 +141,11 @@ describe("Action Service", () => {
 
       const mockUUID = "generated-action-id";
 
-      jest
-        .spyOn(crypto, "randomUUID")
-        .mockReturnValue(mockUUID);
+      jest.spyOn(crypto, "randomUUID").mockReturnValue(mockUUID);
 
       const result = actionService.createAction(mockAction);
 
-      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith(
-        "member-1",
-      );
+      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith("member-1");
 
       expect(mockedActionRepository.createAction).toHaveBeenCalledWith({
         ...mockAction,
@@ -153,14 +188,9 @@ describe("Action Service", () => {
 
       mockedActionRepository.editAction.mockReturnValue(0);
 
-      const result = actionService.editAction(
-        "action-1",
-        updatedAction,
-      );
+      const result = actionService.editAction("action-1", updatedAction);
 
-      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith(
-        "member-1",
-      );
+      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith("member-1");
 
       expect(mockedActionRepository.editAction).toHaveBeenCalledWith(
         "action-1",
