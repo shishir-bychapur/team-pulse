@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
 import { Mood, Update } from "@/src/types/update";
 import { updateService } from "@/src/services/update";
+import { verifySession } from "@/src/utils/session";
 
 jest.mock("@/src/services/update", () => ({
   updateService: {
@@ -10,15 +11,23 @@ jest.mock("@/src/services/update", () => ({
   },
 }));
 
-const mockedUpdateService = updateService as jest.Mocked<
-  typeof updateService
->;
+jest.mock("@/src/utils/session", () => ({
+  verifySession: jest.fn(),
+}));
+
+const mockedVerifySession = jest.mocked(verifySession);
+
+const mockedUpdateService = updateService as jest.Mocked<typeof updateService>;
 
 describe("GET /api/updates", () => {
   const baseUrl = "http://localhost:3000/api/updates";
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   it("should return updates successfully", async () => {
@@ -55,6 +64,21 @@ describe("GET /api/updates", () => {
     expect(mockedUpdateService.getUpdates).toHaveBeenCalledTimes(1);
   });
 
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+    mockedUpdateService.getUpdates.mockReturnValue([]);
+
+    const req = new NextRequest(baseUrl);
+
+    const response = await GET(req);
+
+    expect(response.status).toBe(401);
+    expect(mockedUpdateService.getUpdates).toHaveBeenCalledTimes(0);
+  });
+
   it("should pass the request URL to the update service", async () => {
     mockedUpdateService.getUpdates.mockReturnValue([]);
 
@@ -66,16 +90,11 @@ describe("GET /api/updates", () => {
 
     expect(mockedUpdateService.getUpdates).toHaveBeenCalledTimes(1);
 
-    const passedUrl =
-      mockedUpdateService.getUpdates.mock.calls[0][0];
+    const passedUrl = mockedUpdateService.getUpdates.mock.calls[0][0];
 
-    expect(passedUrl.searchParams.getAll("members")).toEqual([
-      "member-1",
-    ]);
+    expect(passedUrl.searchParams.getAll("members")).toEqual(["member-1"]);
 
-    expect(passedUrl.searchParams.getAll("moods")).toEqual([
-      "GREEN",
-    ]);
+    expect(passedUrl.searchParams.getAll("moods")).toEqual(["GREEN"]);
 
     expect(passedUrl.searchParams.get("date")).toBe("2026-09-01");
   });
@@ -86,6 +105,10 @@ describe("POST /api/updates", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   const mockValidUpdate = {
@@ -115,6 +138,22 @@ describe("POST /api/updates", () => {
     expect(mockedUpdateService.createUpdate).toHaveBeenCalledTimes(1);
   });
 
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidUpdate),
+    });
+
+    const response = await POST(req);
+
+    expect(response.status).toBe(401);
+    expect(mockedUpdateService.createUpdate).toHaveBeenCalledTimes(0);
+  });
+
   describe("should return validation error when", () => {
     it("memberId is missing", async () => {
       const { memberId, ...invalidUpdate } = mockValidUpdate;
@@ -131,9 +170,7 @@ describe("POST /api/updates", () => {
 
       expect(data.errors).toBeDefined();
 
-      expect(
-        mockedUpdateService.createUpdate,
-      ).not.toHaveBeenCalled();
+      expect(mockedUpdateService.createUpdate).not.toHaveBeenCalled();
     });
 
     it("date is invalid", async () => {
@@ -149,9 +186,7 @@ describe("POST /api/updates", () => {
 
       expect(response.status).toBe(400);
 
-      expect(
-        mockedUpdateService.createUpdate,
-      ).not.toHaveBeenCalled();
+      expect(mockedUpdateService.createUpdate).not.toHaveBeenCalled();
     });
 
     it("date has the correct format but is invalid", async () => {
@@ -167,9 +202,7 @@ describe("POST /api/updates", () => {
 
       expect(response.status).toBe(400);
 
-      expect(
-        mockedUpdateService.createUpdate,
-      ).not.toHaveBeenCalled();
+      expect(mockedUpdateService.createUpdate).not.toHaveBeenCalled();
     });
 
     it("text is invalid", async () => {
@@ -185,9 +218,7 @@ describe("POST /api/updates", () => {
 
       expect(response.status).toBe(400);
 
-      expect(
-        mockedUpdateService.createUpdate,
-      ).not.toHaveBeenCalled();
+      expect(mockedUpdateService.createUpdate).not.toHaveBeenCalled();
     });
 
     it("mood is invalid", async () => {
@@ -203,9 +234,7 @@ describe("POST /api/updates", () => {
 
       expect(response.status).toBe(400);
 
-      expect(
-        mockedUpdateService.createUpdate,
-      ).not.toHaveBeenCalled();
+      expect(mockedUpdateService.createUpdate).not.toHaveBeenCalled();
     });
   });
 

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { GET, PATCH } from "./route";
 import { ActionItem, ActionStatus } from "@/src/types/action";
 import { actionService } from "@/src/services/action";
+import { verifySession } from "@/src/utils/session";
 
 jest.mock("@/src/services/action", () => ({
   actionService: {
@@ -10,13 +11,22 @@ jest.mock("@/src/services/action", () => ({
   },
 }));
 
+jest.mock("@/src/utils/session", () => ({
+  verifySession: jest.fn(),
+}));
+
 const mockedActionService = actionService as jest.Mocked<typeof actionService>;
+const mockedVerifySession = jest.mocked(verifySession);
 
 describe("GET /api/actions/[id]", () => {
   const baseUrl = "http://localhost:3000/api/actions";
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   it("should return status 200 and the action when it exists", async () => {
@@ -67,6 +77,19 @@ describe("GET /api/actions/[id]", () => {
 
     expect(mockedActionService.getAction).toHaveBeenCalledWith("invalid-id");
   });
+
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+    const req = new NextRequest(`${baseUrl}/act-1`);
+    const params = Promise.resolve({ id: "act-1" });
+
+    const response = await GET(req, { params });
+
+    expect(response.status).toBe(401);
+  });
 });
 
 describe("PATCH /api/actions/[id]", () => {
@@ -74,6 +97,10 @@ describe("PATCH /api/actions/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   const mockValidAction = {
@@ -106,6 +133,24 @@ describe("PATCH /api/actions/[id]", () => {
     );
 
     expect(mockedActionService.editAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return status 401 if the user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      username: null,
+    });
+
+    const req = new NextRequest(`${baseUrl}/act-1`, {
+      method: "PATCH",
+      body: JSON.stringify(mockValidAction),
+    });
+
+    const params = Promise.resolve({ id: "act-1" });
+
+    const response = await PATCH(req, { params });
+
+    expect(response.status).toBe(401);
   });
 
   describe("should return validation error when", () => {
