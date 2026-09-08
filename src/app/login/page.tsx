@@ -3,9 +3,11 @@
 import { AuthForm, authSchema } from "@/src/schema/auth";
 import { authAPI } from "@/src/utils/apis/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export default function SignInPage() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -21,6 +23,8 @@ export default function SignInPage() {
   const onSubmit = async (data: AuthForm) => {
     try {
       await authAPI.login(data.username, data.password);
+      router.refresh();
+      router.push("/");
     } catch (err) {
       console.error(err);
     }

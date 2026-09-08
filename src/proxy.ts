@@ -22,10 +22,6 @@ export default async function proxy(req: NextRequest) {
   // Decrypt session
   const session = cookie ? await decrypt(cookie) : null;
 
-  console.log("Path:", path);
-  console.log("Cookie exists:", !!cookie);
-  console.log("Session:", session);
-
   // Redirect unauthenticated users trying to access protected routes
   if (isProtectedRoute && !session?.username) {
     return NextResponse.redirect(new URL("/login", req.url));
