@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { GET, PATCH } from "./route";
 import { ActionItem, ActionStatus } from "@/src/types/action";
 import { actionService } from "@/src/services/action";
+import { verifySession } from "@/src/utils/session";
 
 jest.mock("@/src/services/action", () => ({
   actionService: {
@@ -10,13 +11,22 @@ jest.mock("@/src/services/action", () => ({
   },
 }));
 
+jest.mock("@/src/utils/session", () => ({
+  verifySession: jest.fn(),
+}));
+
 const mockedActionService = actionService as jest.Mocked<typeof actionService>;
+const mockedVerifySession = jest.mocked(verifySession);
 
 describe("GET /api/actions/[id]", () => {
   const baseUrl = "http://localhost:3000/api/actions";
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   it("should return status 200 and the action when it exists", async () => {
@@ -74,6 +84,10 @@ describe("PATCH /api/actions/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   const mockValidAction = {

@@ -2,9 +2,11 @@ import { ActionItem } from "@/src/types/action";
 import { NextResponse } from "next/server";
 import { actionSchema } from "@/src/schema/action";
 import { actionService } from "@/src/services/action";
+import { verifySession } from "@/src/utils/session";
 
 type GetResponseData = {
-  action: ActionItem | null;
+  action?: ActionItem | null;
+  errors?: string;
 };
 
 type PatchResponseData = {
@@ -15,6 +17,13 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<GetResponseData>> {
+  const session = await verifySession();
+  if (!session.isAuth) {
+    return NextResponse.json(
+      { errors: "Unauthorized. Please log in." },
+      { status: 401 },
+    );
+  }
   const { id } = await params;
   const action = actionService.getAction(id);
   if (!action) {
@@ -28,6 +37,13 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<PatchResponseData>> {
+  const session = await verifySession();
+  if (!session.isAuth) {
+    return NextResponse.json(
+      { errors: "Unauthorized. Please log in." },
+      { status: 401 },
+    );
+  }
   const data = await req.json();
   const validationResult = actionSchema.safeParse(data);
   if (!validationResult.success) {

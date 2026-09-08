@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { authService } from "@/src/services/auth";
+import { verifySession } from "@/src/utils/session";
 
 jest.mock("@/src/services/auth", () => ({
   authService: {
@@ -8,9 +9,19 @@ jest.mock("@/src/services/auth", () => ({
   },
 }));
 
+jest.mock("@/src/utils/session", () => ({
+  verifySession: jest.fn(),
+}));
+
+const mockedVerifySession = jest.mocked(verifySession);
+
 describe("GET /auth/logout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      username: "test@test.com",
+    });
   });
 
   it("should call authService.logout", async () => {
