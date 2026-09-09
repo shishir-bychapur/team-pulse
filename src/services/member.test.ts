@@ -2,6 +2,10 @@ import { memberService } from "./member";
 import { memberRepository } from "../repositories/member";
 import { MemberWithRole } from "../types/member";
 
+jest.mock("next/cache", () => ({
+  unstable_cache: jest.fn((fn) => fn),
+}));
+
 jest.mock("../repositories/member", () => ({
   memberRepository: {
     getMembers: jest.fn(),
