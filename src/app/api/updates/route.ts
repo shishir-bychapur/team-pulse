@@ -63,9 +63,9 @@ export async function POST(
   } catch (err) {
     return NextResponse.json(
       {
-        errors: "There is no member with the given memberId!",
+        errors: "Something went wrong. Please try again later.",
       },
-      { status: 403 },
+      { status: 500 },
     );
   }
 }

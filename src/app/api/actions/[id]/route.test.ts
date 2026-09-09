@@ -24,9 +24,11 @@ describe("GET /api/actions/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockedVerifySession.mockResolvedValue({
       isAuth: true,
-      username: "test@test.com",
+      name: "Test User",
+      id: "member-1",
     });
   });
 
@@ -42,10 +44,11 @@ describe("GET /api/actions/[id]", () => {
         id: "member-1",
         roleId: "role-1",
         timezone: "utc",
+        email: "jake@email.com",
       },
     };
 
-    mockedActionService.getAction.mockReturnValue(Promise.resolve(mockAction));
+    mockedActionService.getAction.mockResolvedValue(mockAction);
 
     const req = new NextRequest(`${baseUrl}/act-1`);
     const params = Promise.resolve({ id: "act-1" });
@@ -60,15 +63,13 @@ describe("GET /api/actions/[id]", () => {
     });
 
     expect(mockedActionService.getAction).toHaveBeenCalledWith("act-1");
-
     expect(mockedActionService.getAction).toHaveBeenCalledTimes(1);
   });
 
   it("should return status 404 and null when the action does not exist", async () => {
-    mockedActionService.getAction.mockReturnValue(Promise.resolve(null));
+    mockedActionService.getAction.mockResolvedValue(null);
 
     const req = new NextRequest(`${baseUrl}/invalid-id`);
-
     const params = Promise.resolve({
       id: "invalid-id",
     });
@@ -88,14 +89,43 @@ describe("GET /api/actions/[id]", () => {
   it("should return status 401 if the user is not logged in", async () => {
     mockedVerifySession.mockResolvedValue({
       isAuth: false,
-      username: null,
+      name: null,
+      id: null,
     });
+
     const req = new NextRequest(`${baseUrl}/act-1`);
     const params = Promise.resolve({ id: "act-1" });
 
     const response = await GET(req, { params });
+    const data = await response.json();
 
     expect(response.status).toBe(401);
+
+    expect(data).toEqual({
+      errors: "Unauthorized. Please log in.",
+    });
+
+    expect(mockedActionService.getAction).not.toHaveBeenCalled();
+  });
+
+  it("should return status 500 when the service throws an error", async () => {
+    mockedActionService.getAction.mockRejectedValue(
+      new Error("Database error"),
+    );
+
+    const req = new NextRequest(`${baseUrl}/act-1`);
+    const params = Promise.resolve({ id: "act-1" });
+
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+
+    expect(data).toEqual({
+      errors: "Something went wrong. Please try again later.",
+    });
+
+    expect(mockedActionService.getAction).toHaveBeenCalledWith("act-1");
   });
 });
 
@@ -104,9 +134,11 @@ describe("PATCH /api/actions/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockedVerifySession.mockResolvedValue({
       isAuth: true,
-      username: "test@test.com",
+      name: "Test User",
+      id: "member-1",
     });
   });
 
@@ -118,7 +150,7 @@ describe("PATCH /api/actions/[id]", () => {
   };
 
   it("should update an existing action successfully", async () => {
-    mockedActionService.editAction.mockReturnValue(Promise.resolve());
+    mockedActionService.editAction.mockResolvedValue(undefined);
 
     const req = new NextRequest(`${baseUrl}/act-1`, {
       method: "PATCH",
@@ -131,7 +163,6 @@ describe("PATCH /api/actions/[id]", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-
     expect(data).toEqual({});
 
     expect(mockedActionService.editAction).toHaveBeenCalledWith(
@@ -145,7 +176,8 @@ describe("PATCH /api/actions/[id]", () => {
   it("should return status 401 if the user is not logged in", async () => {
     mockedVerifySession.mockResolvedValue({
       isAuth: false,
-      username: null,
+      name: null,
+      id: null,
     });
 
     const req = new NextRequest(`${baseUrl}/act-1`, {
@@ -156,8 +188,15 @@ describe("PATCH /api/actions/[id]", () => {
     const params = Promise.resolve({ id: "act-1" });
 
     const response = await PATCH(req, { params });
+    const data = await response.json();
 
     expect(response.status).toBe(401);
+
+    expect(data).toEqual({
+      errors: "Unauthorized. Please log in.",
+    });
+
+    expect(mockedActionService.editAction).not.toHaveBeenCalled();
   });
 
   describe("should return validation error when", () => {
@@ -198,7 +237,7 @@ describe("PATCH /api/actions/[id]", () => {
       expect(mockedActionService.editAction).not.toHaveBeenCalled();
     });
 
-    it("due date is in the correct format but invalid", async () => {
+    it("due date has the correct format but is invalid", async () => {
       const req = new NextRequest(`${baseUrl}/act-1`, {
         method: "PATCH",
         body: JSON.stringify({
@@ -253,37 +292,10 @@ describe("PATCH /api/actions/[id]", () => {
     });
   });
 
-  it("should return 404 when the action does not exist", async () => {
-    mockedActionService.editAction.mockReturnValue(Promise.resolve());
-
-    const req = new NextRequest(`${baseUrl}/invalid-id`, {
-      method: "PATCH",
-      body: JSON.stringify(mockValidAction),
-    });
-
-    const params = Promise.resolve({
-      id: "invalid-id",
-    });
-
-    const response = await PATCH(req, { params });
-    const data = await response.json();
-
-    expect(response.status).toBe(404);
-
-    expect(data).toEqual({
-      errors: "There is no action item with the given id!",
-    });
-
-    expect(mockedActionService.editAction).toHaveBeenCalledWith(
-      "invalid-id",
-      mockValidAction,
+  it("should return status 500 when the service throws an error", async () => {
+    mockedActionService.editAction.mockRejectedValue(
+      new Error("Database error"),
     );
-  });
-
-  it("should return 403 when the owner does not exist", async () => {
-    mockedActionService.editAction.mockImplementation(() => {
-      throw new Error("There is no member with the given ownerId!");
-    });
 
     const req = new NextRequest(`${baseUrl}/act-1`, {
       method: "PATCH",
@@ -295,10 +307,10 @@ describe("PATCH /api/actions/[id]", () => {
     const response = await PATCH(req, { params });
     const data = await response.json();
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(500);
 
     expect(data).toEqual({
-      errors: "There is no member with the given ownerId!",
+      errors: "Something went wrong. Please try again later.",
     });
 
     expect(mockedActionService.editAction).toHaveBeenCalledWith(

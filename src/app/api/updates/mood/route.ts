@@ -8,19 +8,28 @@ type GetResponseData = {
   errors?: string;
 };
 
-export async function GET(
-  req: Request,
-): Promise<NextResponse<GetResponseData>> {
+export async function GET(): Promise<NextResponse<GetResponseData>> {
   const session = await verifySession();
+
   if (!session.isAuth) {
     return NextResponse.json(
       { errors: "Unauthorized. Please log in." },
       { status: 401 },
     );
   }
-  const moods = await updateService.getMoodBreakdown();
 
-  return NextResponse.json({
-    moods,
-  });
+  try {
+    const moods = await updateService.getMoodBreakdown();
+
+    return NextResponse.json({
+      moods,
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        errors: "Something went wrong. Please try again later.",
+      },
+      { status: 500 },
+    );
+  }
 }

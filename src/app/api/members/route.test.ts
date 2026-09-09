@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { memberService } from "@/src/services/member";
 import { MemberWithRole } from "@/src/types/member";
@@ -12,8 +11,6 @@ jest.mock("@/src/services/member", () => ({
 const mockedMemberService = memberService as jest.Mocked<typeof memberService>;
 
 describe("GET /api/members", () => {
-  const baseUrl = "http://localhost:3000/api/members";
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -29,6 +26,7 @@ describe("GET /api/members", () => {
           name: "Developer",
         },
         roleId: "r1",
+        email: "tom@email.com",
       },
       {
         id: "2",
@@ -39,16 +37,13 @@ describe("GET /api/members", () => {
           name: "Designer",
         },
         roleId: "r2",
+        email: "harry@email.com",
       },
     ];
 
-    mockedMemberService.getMembers.mockReturnValue(
-      Promise.resolve(mockMembers),
-    );
+    mockedMemberService.getMembers.mockResolvedValue(mockMembers);
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -61,17 +56,32 @@ describe("GET /api/members", () => {
   });
 
   it("should return an empty array when there are no members", async () => {
-    mockedMemberService.getMembers.mockReturnValue(Promise.resolve([]));
+    mockedMemberService.getMembers.mockResolvedValue([]);
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
 
     expect(data).toEqual({
       members: [],
+    });
+
+    expect(mockedMemberService.getMembers).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return status 500 when getting members fails", async () => {
+    mockedMemberService.getMembers.mockRejectedValue(
+      new Error("Database error"),
+    );
+
+    const response = await GET();
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+
+    expect(data).toEqual({
+      errors: "Something went wrong. Please try again later.",
     });
 
     expect(mockedMemberService.getMembers).toHaveBeenCalledTimes(1);
