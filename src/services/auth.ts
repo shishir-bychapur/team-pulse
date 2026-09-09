@@ -3,9 +3,8 @@ import { createSession, deleteSession } from "../utils/session";
 
 export const authService = {
   login: async (username: string, password: string): Promise<void> => {
-    if (authRepository.login(username, password)) {
-      await createSession(username);
-    }
+    const member = await authRepository.login(username, password);
+    await createSession(member.id, member.name);
   },
   logout: async (): Promise<void> => {
     await deleteSession();

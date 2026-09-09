@@ -1,20 +1,23 @@
-import { JWTPayload } from "jose";
-
 export interface Auth {
   username: string;
   password: string;
 }
 
 export type Session = {
-  username: string;
+  id: string;
+  name: string;
   expiresAt: Date;
 };
 
-export type SessionPayload = JWTPayload & {
-  username: string;
+export type SessionPayload = {
+  id: string;
+  name: string;
+  iat?: number;
+  exp?: number;
 };
 
 export type VerifySessionResult = {
   isAuth: boolean;
-  username: string | null;
+  id: string | null;
+  name: string | null;
 };

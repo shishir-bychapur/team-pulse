@@ -27,7 +27,15 @@ export async function POST(
       { status: 400 },
     );
   }
-
-  await authService.login(data.username, data.password);
-  return NextResponse.json({}, { status: 200 });
+  try {
+    await authService.login(data.username, data.password);
+    return NextResponse.json({}, { status: 200 });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        errors: "The entered username and/or password are incorrect!",
+      },
+      { status: 400 },
+    );
+  }
 }
