@@ -37,6 +37,8 @@ const mockMembers = [
       id: "1",
     },
     timezone: "UTC",
+    email: "alice@email.com",
+    roleId: "1",
   },
   {
     id: "member-2",
@@ -46,6 +48,8 @@ const mockMembers = [
       id: "2",
     },
     timezone: "UTC",
+    email: "bob@email.com",
+    roleId: "2",
   },
 ];
 

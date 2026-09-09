@@ -2,30 +2,33 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import MemberPage from "./page";
 import { notFound } from "next/navigation";
-import { Member } from "@/src/types/member";
-import { memberAPI } from "@/src/utils/apis/member";
+import { MemberWithRole } from "@/src/types/member";
+import { memberService } from "@/src/services/member";
 
 jest.mock("next/navigation", () => ({
   notFound: jest.fn(),
 }));
 
-jest.mock("@/src/utils/apis/member", () => ({
-  memberAPI: {
-    getSingleMember: jest.fn(),
+jest.mock("@/src/services/member", () => ({
+  memberService: {
+    getMember: jest.fn(),
   },
 }));
 
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+const mockedMemberService = memberService as jest.Mocked<typeof memberService>;
+
 const mockedNotFound = notFound as jest.MockedFunction<typeof notFound>;
 
-const mockMember: Member = {
+const mockMember: MemberWithRole = {
   id: "123",
   name: "Alice Johnson",
+  email: "alice@example.com",
   role: {
     name: "Software Engineer",
     id: "1",
   },
   timezone: "UTC-5",
+  roleId: "1",
 };
 
 describe("MemberPage", () => {
@@ -34,9 +37,7 @@ describe("MemberPage", () => {
   });
 
   it("fetches and renders member details successfully", async () => {
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: mockMember,
-    });
+    mockedMemberService.getMember.mockResolvedValue(mockMember);
 
     const params = Promise.resolve({ id: "123" });
 
@@ -44,7 +45,7 @@ describe("MemberPage", () => {
 
     render(ResolvedPage);
 
-    expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith("123");
+    expect(mockedMemberService.getMember).toHaveBeenCalledWith("123");
 
     expect(
       screen.getByRole("heading", { name: "Member Details" }),
@@ -57,7 +58,9 @@ describe("MemberPage", () => {
     expect(screen.getByText("Alice Johnson")).toBeInTheDocument();
 
     // Role appears in both the profile badge and member information section
-    expect(screen.getAllByText("Software Engineer").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Software Engineer")).toHaveLength(2);
+
+    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
 
     expect(screen.getByText("UTC-5")).toBeInTheDocument();
 
@@ -67,9 +70,7 @@ describe("MemberPage", () => {
   });
 
   it("renders a link back to the members page", async () => {
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: mockMember,
-    });
+    mockedMemberService.getMember.mockResolvedValue(mockMember);
 
     const params = Promise.resolve({ id: "123" });
 
@@ -86,9 +87,7 @@ describe("MemberPage", () => {
   });
 
   it("renders the member initial in the avatar", async () => {
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: mockMember,
-    });
+    mockedMemberService.getMember.mockResolvedValue(mockMember);
 
     const params = Promise.resolve({ id: "123" });
 
@@ -100,20 +99,18 @@ describe("MemberPage", () => {
   });
 
   it("calls notFound when the member is null", async () => {
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: null,
-    });
+    mockedMemberService.getMember.mockResolvedValue(null);
 
     const params = Promise.resolve({ id: "999" });
 
     await MemberPage({ params });
 
-    expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith("999");
+    expect(mockedMemberService.getMember).toHaveBeenCalledWith("999");
     expect(mockedNotFound).toHaveBeenCalledTimes(1);
   });
 
-  it("throws when memberAPI encounters a network error", async () => {
-    mockedMemberAPI.getSingleMember.mockRejectedValue(
+  it("throws when memberService encounters a network error", async () => {
+    mockedMemberService.getMember.mockRejectedValue(
       new Error("Network Error!"),
     );
 

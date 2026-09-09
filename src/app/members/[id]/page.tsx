@@ -1,4 +1,4 @@
-import { memberAPI } from "@/src/utils/apis/member";
+import { memberService } from "@/src/services/member";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,13 +8,12 @@ export default async function MemberPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const data = await memberAPI.getSingleMember(id);
+  const member = await memberService.getMember(id);
 
-  if (!data.member) {
+  if (!member) {
     return notFound();
   }
 
-  const member = data.member;
   const initial = member.name.charAt(0).toUpperCase();
 
   return (
