@@ -3,8 +3,9 @@
 import { ActionForm, actionSchema } from "@/src/schema/action";
 import { actionAPI } from "@/src/utils/apis/action";
 import { memberAPI } from "@/src/utils/apis/member";
-import { ActionItem, ActionStatus } from "@/src/types/action";
-import { Member } from "@/src/types/member";
+import { ActionItem } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
+import { MemberWithRole } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ export default function EditAction() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const actionId = params.id;
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithRole[]>([]);
   const [action, setAction] = useState<ActionItem | null>(null);
 
   useEffect(() => {

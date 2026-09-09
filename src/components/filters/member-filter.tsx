@@ -1,4 +1,4 @@
-import { Member } from "../../types/member";
+import { MemberWithRole } from "../../types/member";
 import { Dispatch, SetStateAction } from "react";
 import CheckBox from "../input/checkbox";
 
@@ -7,7 +7,7 @@ export default function MemberFilter({
   filter,
   setFilter,
 }: {
-  members: Member[];
+  members: MemberWithRole[];
   filter: string[];
   setFilter: Dispatch<SetStateAction<string[]>>;
 }) {

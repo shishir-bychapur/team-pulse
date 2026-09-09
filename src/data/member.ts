@@ -1,4 +1,5 @@
-import { Role, Member } from "../types/member";
+import { Role } from "../types/member";
+import { Member } from "@/generated/prisma/client";
 
 const roles: Role[] = [
   {
@@ -19,31 +20,36 @@ export const members: Member[] = [
   {
     id: "1",
     name: "Tom",
-    role: roles[0],
     timezone: "UTC",
+    roleId: "1",
+    email: "tom@team-pulse.com",
   },
   {
     id: "2",
     name: "Harry",
-    role: roles[1],
     timezone: "UTC",
+    roleId: "2",
+    email: "harry@team-pulse.com",
   },
   {
     id: "3",
     name: "Dominic",
-    role: roles[2],
     timezone: "UTC",
+    roleId: "3",
+    email: "dominic@team-pulse.com",
   },
   {
     id: "4",
     name: "Paul",
-    role: roles[0],
     timezone: "UTC",
+    roleId: "1",
+    email: "paul@team-pulse.com",
   },
   {
     id: "5",
     name: "Joel",
-    role: roles[2],
     timezone: "UTC",
+    roleId: "3",
+    email: "joel@team-pulse.com",
   },
 ];

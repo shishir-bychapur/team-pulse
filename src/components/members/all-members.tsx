@@ -1,10 +1,10 @@
 "use client";
 
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 import Card from "../card/card";
 import { useRouter } from "next/navigation";
 
-export function AllMembers({ members }: { members: Member[] }) {
+export function AllMembers({ members }: { members: MemberWithRole[] }) {
   const router = useRouter();
 
   return (

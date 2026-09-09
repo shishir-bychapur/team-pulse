@@ -21,6 +21,7 @@ model Member {
   actions  ActionItem[]
   role     Role         @relation(fields: [roleId], references: [id])
   updates  Update[]
+  email    String       @unique     
 }
 
 model Update {

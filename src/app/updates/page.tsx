@@ -5,7 +5,7 @@ import DateFilter from "../../components/filters/date-filter";
 import UpdateCard from "../../components/updates/update";
 import MemberFilter from "../../components/filters/member-filter";
 import { useState, useEffect } from "react";
-import { Member } from "../../types/member";
+import { MemberWithRole } from "../../types/member";
 import { UpdateWithMember } from "../../types/update";
 import Link from "next/link";
 import { memberAPI } from "@/src/utils/apis/member";
@@ -16,7 +16,7 @@ const Updates = () => {
   const [memberFilter, setMemberFilter] = useState<string[]>([]);
   const [moodFilter, setMoodFilter] = useState<string[]>([]);
   const [dateFilter, setDateFilter] = useState<string>("");
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithRole[]>([]);
 
   useEffect(() => {
     const fetchMembers = async () => {

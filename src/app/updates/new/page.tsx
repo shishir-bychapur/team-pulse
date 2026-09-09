@@ -4,14 +4,14 @@ import { moods } from "@/src/data/update";
 import { UpdateForm, updateSchema } from "@/src/schema/update";
 import { memberAPI } from "@/src/utils/apis/member";
 import { updateAPI } from "@/src/utils/apis/update";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function CreateUpdate() {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithRole[]>([]);
 
   useEffect(() => {
     const fetchMembers = async () => {

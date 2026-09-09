@@ -2,7 +2,7 @@
 
 import { ActionForm, actionSchema } from "@/src/schema/action";
 import { ActionStatus } from "@/generated/prisma/enums";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,7 @@ import { actionAPI } from "@/src/utils/apis/action";
 
 export default function CreateAction() {
   const router = useRouter();
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithRole[]>([]);
 
   useEffect(() => {
     const fetchMembers = async () => {

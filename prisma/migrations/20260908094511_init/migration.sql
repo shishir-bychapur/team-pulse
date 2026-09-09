@@ -10,6 +10,7 @@ CREATE TABLE "Member" (
     "name" TEXT NOT NULL,
     "timezone" TEXT NOT NULL,
     "roleId" TEXT NOT NULL,
+    "email" TEXT NOT NULL UNIQUE,
     CONSTRAINT "Member_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 

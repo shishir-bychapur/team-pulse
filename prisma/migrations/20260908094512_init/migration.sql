@@ -13,37 +13,42 @@ VALUES
 -- MEMBERS
 -- =========================
 
-INSERT INTO "Member" ("id", "name", "roleId", "timezone")
+INSERT INTO "Member" ("id", "name", "roleId", "timezone", "email")
 VALUES
   (
     '660e8400-e29b-41d4-a716-446655440001',
     'Tom',
     '550e8400-e29b-41d4-a716-446655440001',
-    'UTC'
+    'UTC',
+    'tom@team-pulse.com'
   ),
   (
     '660e8400-e29b-41d4-a716-446655440002',
     'Harry',
     '550e8400-e29b-41d4-a716-446655440002',
-    'UTC'
+    'UTC',
+    'harry@team-pulse.com'
   ),
   (
     '660e8400-e29b-41d4-a716-446655440003',
     'Dominic',
     '550e8400-e29b-41d4-a716-446655440003',
-    'UTC'
+    'UTC',
+    'dominic@team-pulse.com'
   ),
   (
     '660e8400-e29b-41d4-a716-446655440004',
     'Paul',
     '550e8400-e29b-41d4-a716-446655440001',
-    'UTC'
+    'UTC',
+    'paul@team-pulse.com'
   ),
   (
     '660e8400-e29b-41d4-a716-446655440005',
     'Joel',
     '550e8400-e29b-41d4-a716-446655440003',
-    'UTC'
+    'UTC',
+    'joel@team-pulse.com'
   );
 
 
