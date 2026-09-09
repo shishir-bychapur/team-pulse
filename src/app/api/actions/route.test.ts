@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { ActionItem, ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
+import { ActionItemWithOwner } from "@/src/types/action";
 
 jest.mock("@/src/services/action", () => ({
   actionService: {
@@ -26,18 +27,26 @@ describe("GET /api/actions", () => {
 
     mockedVerifySession.mockResolvedValue({
       isAuth: true,
-      username: "test@test.com",
+      name: "Test User",
+      id: "member-1",
     });
   });
 
   it("should return all actions successfully", async () => {
-    const mockActions: ActionItem[] = [
+    const mockActions: ActionItemWithOwner[] = [
       {
         id: "act-1",
         title: "Setup CI pipeline",
         ownerId: "member-1",
         status: ActionStatus.OPEN,
         dueDate: "2026-09-17",
+        owner: {
+          name: "Jake",
+          id: "member-1",
+          roleId: "role-1",
+          timezone: "utc",
+          email: "jake@email.com",
+        },
       },
       {
         id: "act-2",
@@ -45,10 +54,18 @@ describe("GET /api/actions", () => {
         ownerId: "member-2",
         status: ActionStatus.CLOSED,
         dueDate: "2026-09-21",
+        owner: {
+          name: "Jose",
+          id: "member-2",
+          roleId: "role-1",
+          timezone: "utc",
+          email: "jose@email.com",
+        },
       },
     ];
 
-    mockedActionService.getActions.mockReturnValue(mockActions);
+    mockedActionService.getActions.mockResolvedValue(mockActions);
+
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);
@@ -64,7 +81,7 @@ describe("GET /api/actions", () => {
   });
 
   it("should return an empty array when there are no actions", async () => {
-    mockedActionService.getActions.mockReturnValue([]);
+    mockedActionService.getActions.mockResolvedValue([]);
 
     const req = new NextRequest(baseUrl);
 
@@ -83,16 +100,41 @@ describe("GET /api/actions", () => {
   it("should return 401 if user is not logged in", async () => {
     mockedVerifySession.mockResolvedValue({
       isAuth: false,
-      username: null,
+      name: null,
+      id: null,
     });
 
-    mockedActionService.getActions.mockReturnValue([]);
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);
+    const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(mockedActionService.getActions).toHaveBeenCalledTimes(0);
+
+    expect(data).toEqual({
+      errors: "Unauthorized. Please log in.",
+    });
+
+    expect(mockedActionService.getActions).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when getting actions fails", async () => {
+    mockedActionService.getActions.mockRejectedValue(
+      new Error("Database error"),
+    );
+
+    const req = new NextRequest(baseUrl);
+
+    const response = await GET(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+
+    expect(data).toEqual({
+      errors: "Something went wrong. Please try again later.",
+    });
+
+    expect(mockedActionService.getActions).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -101,9 +143,11 @@ describe("POST /api/actions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockedVerifySession.mockResolvedValue({
       isAuth: true,
-      username: "test@test.com",
+      name: "Test User",
+      id: "member-1",
     });
   });
 
@@ -115,7 +159,7 @@ describe("POST /api/actions", () => {
   };
 
   it("should create an action successfully", async () => {
-    mockedActionService.createAction.mockReturnValue("generated-action-id");
+    mockedActionService.createAction.mockResolvedValue("generated-action-id");
 
     const req = new NextRequest(baseUrl, {
       method: "POST",
@@ -138,8 +182,8 @@ describe("POST /api/actions", () => {
     expect(mockedActionService.createAction).toHaveBeenCalledTimes(1);
   });
 
-  describe("should return validation error when", () => {
-    it("title is missing", async () => {
+  describe("Validation", () => {
+    it("should return validation error when title is missing", async () => {
       const { title, ...invalidAction } = mockValidAction;
 
       const req = new NextRequest(baseUrl, {
@@ -156,7 +200,7 @@ describe("POST /api/actions", () => {
       expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("title is invalid", async () => {
+    it("should return validation error when title is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
         body: JSON.stringify({
@@ -174,25 +218,7 @@ describe("POST /api/actions", () => {
       expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("due date is in the correct format but invalid", async () => {
-      const req = new NextRequest(baseUrl, {
-        method: "POST",
-        body: JSON.stringify({
-          ...mockValidAction,
-          dueDate: "2026-15-41",
-        }),
-      });
-
-      const response = await POST(req);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.errors).toBeDefined();
-
-      expect(mockedActionService.createAction).not.toHaveBeenCalled();
-    });
-
-    it("due date is invalid", async () => {
+    it("should return validation error when due date format is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
         body: JSON.stringify({
@@ -210,7 +236,25 @@ describe("POST /api/actions", () => {
       expect(mockedActionService.createAction).not.toHaveBeenCalled();
     });
 
-    it("status is invalid", async () => {
+    it("should return validation error when due date is invalid", async () => {
+      const req = new NextRequest(baseUrl, {
+        method: "POST",
+        body: JSON.stringify({
+          ...mockValidAction,
+          dueDate: "2026-15-41",
+        }),
+      });
+
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.errors).toBeDefined();
+
+      expect(mockedActionService.createAction).not.toHaveBeenCalled();
+    });
+
+    it("should return validation error when status is invalid", async () => {
       const req = new NextRequest(baseUrl, {
         method: "POST",
         body: JSON.stringify({
@@ -229,9 +273,37 @@ describe("POST /api/actions", () => {
     });
   });
 
-  it("should return 403 when the owner does not exist", async () => {
-    mockedActionService.createAction.mockImplementation(() => {
-      throw new Error("There is no member with the given ownerId!");
+  it("should return 500 when creating an action fails", async () => {
+    mockedActionService.createAction.mockRejectedValue(
+      new Error("Database error"),
+    );
+
+    const req = new NextRequest(baseUrl, {
+      method: "POST",
+      body: JSON.stringify(mockValidAction),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+
+    expect(data).toEqual({
+      errors: "Something went wrong. Please try again later.",
+    });
+
+    expect(mockedActionService.createAction).toHaveBeenCalledWith(
+      mockValidAction,
+    );
+
+    expect(mockedActionService.createAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return 401 if user is not logged in", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      name: null,
+      id: null,
     });
 
     const req = new NextRequest(baseUrl, {
@@ -242,31 +314,12 @@ describe("POST /api/actions", () => {
     const response = await POST(req);
     const data = await response.json();
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
 
     expect(data).toEqual({
-      errors: "There is no member with the given ownerId!",
+      errors: "Unauthorized. Please log in.",
     });
 
-    expect(mockedActionService.createAction).toHaveBeenCalledWith(
-      mockValidAction,
-    );
-  });
-
-  it("should return 401 if user is not logged in", async () => {
-    mockedVerifySession.mockResolvedValue({
-      isAuth: false,
-      username: null,
-    });
-
-    mockedActionService.createAction.mockReturnValue("generated-action-id");
-
-    const req = new NextRequest(baseUrl, {
-      method: "POST",
-      body: JSON.stringify(mockValidAction),
-    });
-    const response = await POST(req);
-
-    expect(response.status).toBe(401);
+    expect(mockedActionService.createAction).not.toHaveBeenCalled();
   });
 });

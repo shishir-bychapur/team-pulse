@@ -1,8 +1,7 @@
-import { actionAPI } from "@/src/utils/apis/action";
-import { memberAPI } from "@/src/utils/apis/member";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { actionService } from "@/src/services/action";
 
 export default async function ActionPage({
   params,
@@ -11,15 +10,12 @@ export default async function ActionPage({
 }) {
   const { id } = await params;
 
-  const data = await actionAPI.getSingleAction(id);
+  const action = await actionService.getAction(id);
 
-  if (!data.action) {
+  if (!action) {
     return notFound();
   }
 
-  const memberData = await memberAPI.getSingleMember(data.action.ownerId);
-
-  const { action } = data;
   const isOpen = action.status === ActionStatus.OPEN;
 
   return (
@@ -78,7 +74,7 @@ export default async function ActionPage({
               </p>
 
               <p className="mt-2 font-medium text-gray-900">
-                {memberData.member?.name ?? "Unknown"}
+                {action.owner.name ?? "Unknown"}
               </p>
             </div>
 

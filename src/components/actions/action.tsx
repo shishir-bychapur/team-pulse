@@ -1,4 +1,5 @@
-import { ActionItem, ActionStatus } from "@/src/types/action";
+import { ActionItem } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import Link from "next/link";
 
 export default function ActionCard({

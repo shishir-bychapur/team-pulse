@@ -5,6 +5,7 @@ import { authAPI } from "@/src/utils/apis/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function SignInPage() {
       router.refresh();
       router.push("/");
     } catch (err) {
-      console.error(err);
+      toast.error("Invalid credentials! Please try again.");
     }
   };
 

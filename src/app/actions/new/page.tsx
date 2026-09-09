@@ -1,8 +1,8 @@
 "use client";
 
 import { ActionForm, actionSchema } from "@/src/schema/action";
-import { ActionStatus } from "@/src/types/action";
-import { Member } from "@/src/types/member";
+import { ActionStatus } from "@/generated/prisma/enums";
+import { MemberWithRole } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,7 @@ import { actionAPI } from "@/src/utils/apis/action";
 
 export default function CreateAction() {
   const router = useRouter();
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithRole[]>([]);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -52,7 +52,6 @@ export default function CreateAction() {
         router.push(`/actions/${data.id}`);
       }
     } catch (error) {
-      console.error(error);
       toast.error("Error creating a new action!");
     }
   };

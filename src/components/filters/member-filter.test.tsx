@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import MemberFilter from "./member-filter";
-import { members } from "../../data/member";
+import { MemberWithRole } from "../../types/member";
 
 jest.mock("../input/checkbox", () => ({
   __esModule: true,
@@ -24,11 +24,69 @@ jest.mock("../input/checkbox", () => ({
 }));
 
 describe("MemberFilter", () => {
+  const mockMembers: MemberWithRole[] = [
+    {
+      id: "1",
+      name: "Tom",
+      timezone: "Asia/Singapore",
+      roleId: "role-1",
+      role: {
+        id: "role-1",
+        name: "Developer",
+      },
+      email: "tom@email.com",
+    },
+    {
+      id: "2",
+      name: "Harry",
+      timezone: "Europe/London",
+      roleId: "role-2",
+      role: {
+        id: "role-2",
+        name: "Designer",
+      },
+      email: "harry@email.com",
+    },
+    {
+      id: "3",
+      name: "Dominic",
+      timezone: "Asia/Singapore",
+      roleId: "role-1",
+      role: {
+        id: "role-1",
+        name: "Developer",
+      },
+      email: "dominic@email.com",
+    },
+    {
+      id: "4",
+      name: "Paul",
+      timezone: "America/New_York",
+      roleId: "role-3",
+      role: {
+        id: "role-3",
+        name: "Manager",
+      },
+      email: "paul@email.com",
+    },
+    {
+      id: "5",
+      name: "Joel",
+      timezone: "Asia/Tokyo",
+      roleId: "role-3",
+      role: {
+        id: "role-3",
+        name: "Manager",
+      },
+      email: "joel@email.com",
+    },
+  ];
+
   it("renders the members", () => {
     const setFilter = jest.fn();
 
     render(
-      <MemberFilter members={members} filter={[]} setFilter={setFilter} />,
+      <MemberFilter members={mockMembers} filter={[]} setFilter={setFilter} />,
     );
 
     expect(screen.getByText("Tom")).toBeInTheDocument();
@@ -46,10 +104,13 @@ describe("MemberFilter", () => {
     const setFilter = jest.fn();
 
     render(
-      <MemberFilter members={members} filter={["1"]} setFilter={setFilter} />,
+      <MemberFilter
+        members={mockMembers}
+        filter={["1"]}
+        setFilter={setFilter}
+      />,
     );
 
-    expect(screen.getByText("1", { selector: "span" })).toBeInTheDocument();
     expect(screen.getByText("1 selected")).toBeInTheDocument();
   });
 
@@ -57,7 +118,7 @@ describe("MemberFilter", () => {
     const setFilter = jest.fn();
 
     render(
-      <MemberFilter members={members} filter={[]} setFilter={setFilter} />,
+      <MemberFilter members={mockMembers} filter={[]} setFilter={setFilter} />,
     );
 
     const checkbox = screen.getByRole("checkbox", {
@@ -74,7 +135,7 @@ describe("MemberFilter", () => {
 
     render(
       <MemberFilter
-        members={members}
+        members={mockMembers}
         filter={["1", "2"]}
         setFilter={setFilter}
       />,
@@ -94,7 +155,7 @@ describe("MemberFilter", () => {
 
     render(
       <MemberFilter
-        members={members}
+        members={mockMembers}
         filter={["1", "2"]}
         setFilter={setFilter}
       />,

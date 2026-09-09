@@ -9,6 +9,9 @@ export const authAPI = {
         password,
       }),
     });
+    if (!response.ok) {
+      throw new Error("Invalid credentials!");
+    }
     return await response.json();
   },
   async logout(): Promise<void> {

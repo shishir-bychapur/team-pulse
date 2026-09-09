@@ -15,53 +15,86 @@ jest.mock("@/src/utils/session", () => ({
 
 const mockedVerifySession = jest.mocked(verifySession);
 
-describe("GET /auth/logout", () => {
+const mockedAuthService = authService as jest.Mocked<typeof authService>;
+
+describe("GET /api/auth/logout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockedVerifySession.mockResolvedValue({
       isAuth: true,
-      username: "test@test.com",
+      name: "Test User",
+      id: "member-1",
     });
   });
 
-  it("should call authService.logout", async () => {
-    (authService.logout as jest.Mock).mockResolvedValue(undefined);
-
-    const req = new NextRequest("http://localhost:3000/api/auth/logout", {
+  const createRequest = () =>
+    new NextRequest("http://localhost:3000/api/auth/logout", {
       method: "GET",
     });
+
+  it("should call authService.logout", async () => {
+    mockedAuthService.logout.mockResolvedValue(undefined);
+
+    const req = createRequest();
 
     await GET(req);
 
-    expect(authService.logout).toHaveBeenCalledTimes(1);
+    expect(mockedAuthService.logout).toHaveBeenCalledTimes(1);
   });
 
-  it("should return 200 after logging out", async () => {
-    (authService.logout as jest.Mock).mockResolvedValue(undefined);
+  it("should return 200 after logging out successfully", async () => {
+    mockedAuthService.logout.mockResolvedValue(undefined);
 
-    const req = new NextRequest("http://localhost:3000/api/auth/logout", {
-      method: "GET",
-    });
+    const req = createRequest();
 
     const response = await GET(req);
+    const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({});
+
+    expect(data).toEqual({});
+
+    expect(mockedAuthService.logout).toHaveBeenCalledTimes(1);
   });
 
-  it("should return 401 if user is not logged in", async () => {
+  it("should return 401 if the user is not logged in", async () => {
     mockedVerifySession.mockResolvedValue({
       isAuth: false,
-      username: null,
+      name: null,
+      id: null,
     });
-    (authService.logout as jest.Mock).mockResolvedValue(undefined);
 
-    const req = new NextRequest("http://localhost:3000/api/auth/logout", {
-      method: "GET",
-    });
+    const req = createRequest();
 
     const response = await GET(req);
+    const data = await response.json();
 
     expect(response.status).toBe(401);
+
+    expect(data).toEqual({
+      errors: "Unauthorized. Please log in.",
+    });
+
+    expect(mockedAuthService.logout).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when logout fails", async () => {
+    mockedAuthService.logout.mockRejectedValue(
+      new Error("Session deletion failed"),
+    );
+
+    const req = createRequest();
+
+    const response = await GET(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+
+    expect(data).toEqual({
+      errors: "Something went wrong. Please try again later.",
+    });
+
+    expect(mockedAuthService.logout).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,10 +1,10 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CreateUpdate from "./page";
-import { Mood } from "@/src/types/update";
 import { toast } from "sonner";
 import { memberAPI } from "@/src/utils/apis/member";
 import { updateAPI } from "@/src/utils/apis/update";
+import { Mood } from "@/generated/prisma/enums";
 
 jest.mock("sonner", () => ({
   toast: {
@@ -37,6 +37,8 @@ const mockMembers = [
       id: "1",
     },
     timezone: "UTC",
+    email: "alice@email.com",
+    roleId: "1",
   },
   {
     id: "member-2",
@@ -46,6 +48,8 @@ const mockMembers = [
       id: "2",
     },
     timezone: "UTC",
+    email: "bob@email.com",
+    roleId: "2",
   },
 ];
 

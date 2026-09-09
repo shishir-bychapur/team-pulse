@@ -1,15 +1,8 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import Actions from "./page";
-import { memberAPI } from "@/src/utils/apis/member";
 import { actionAPI } from "@/src/utils/apis/action";
-import { ActionStatus } from "@/src/types/action";
-
-jest.mock("@/src/utils/apis/member", () => ({
-  memberAPI: {
-    getAllMembers: jest.fn(),
-  },
-}));
+import { ActionStatus } from "@/generated/prisma/enums";
 
 jest.mock("@/src/utils/apis/action", () => ({
   actionAPI: {
@@ -33,23 +26,7 @@ jest.mock("@/src/components/actions/action", () => ({
   ),
 }));
 
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
 const mockedActionAPI = actionAPI as jest.Mocked<typeof actionAPI>;
-
-const mockMembers = [
-  {
-    id: "member-1",
-    name: "John Doe",
-    role: { id: "1", name: "developer" },
-    timezone: "utc",
-  },
-  {
-    id: "member-2",
-    name: "Jane Smith",
-    role: { id: "2", name: "manager" },
-    timezone: "utc",
-  },
-];
 
 const mockActions = [
   {
@@ -58,6 +35,14 @@ const mockActions = [
     ownerId: "member-1",
     status: ActionStatus.OPEN,
     dueDate: "2026-09-10",
+    owner: {
+      id: "member-1",
+      name: "John Doe",
+      role: { id: "1", name: "developer" },
+      timezone: "utc",
+      roleId: "1",
+      email: "john@email.com",
+    },
   },
   {
     id: "action-2",
@@ -65,16 +50,20 @@ const mockActions = [
     ownerId: "member-2",
     status: ActionStatus.CLOSED,
     dueDate: "2026-09-15",
+    owner: {
+      id: "member-2",
+      name: "Jane Smith",
+      role: { id: "2", name: "manager" },
+      timezone: "utc",
+      roleId: "2",
+      email: "jane@email.com",
+    },
   },
 ];
 
 describe("Actions Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
 
     mockedActionAPI.getAllActions.mockResolvedValue({
       actions: mockActions,
@@ -97,7 +86,6 @@ describe("Actions Page", () => {
     ).toHaveAttribute("href", "/actions/new");
 
     await waitFor(() => {
-      expect(mockedMemberAPI.getAllMembers).toHaveBeenCalledTimes(1);
       expect(mockedActionAPI.getAllActions).toHaveBeenCalledTimes(1);
     });
   });
@@ -155,27 +143,6 @@ describe("Actions Page", () => {
     render(<Actions />);
 
     expect(await screen.findByText("1 action")).toBeInTheDocument();
-  });
-
-  it("handles member API errors", async () => {
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    mockedMemberAPI.getAllMembers.mockRejectedValue(
-      new Error("Failed to fetch members"),
-    );
-
-    render(<Actions />);
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error fetching members:",
-        expect.any(Error),
-      );
-    });
-
-    consoleErrorSpy.mockRestore();
   });
 
   it("handles action API errors", async () => {

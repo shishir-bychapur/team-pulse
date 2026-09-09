@@ -1,6 +1,6 @@
 "use client";
 
-import { Mood } from "../../types/update";
+import { Mood } from "@/generated/prisma/enums";
 import { Dispatch, SetStateAction } from "react";
 import CheckBox from "../input/checkbox";
 import Badge from "../badge/badge";

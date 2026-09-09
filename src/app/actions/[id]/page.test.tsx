@@ -1,29 +1,22 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import ActionPage from "./page";
-import { actionAPI } from "@/src/utils/apis/action";
-import { memberAPI } from "@/src/utils/apis/member";
-import { ActionStatus } from "@/src/types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
 import { notFound } from "next/navigation";
+import { actionService } from "@/src/services/action";
 
 jest.mock("next/navigation", () => ({
   notFound: jest.fn(),
 }));
 
-jest.mock("@/src/utils/apis/action", () => ({
-  actionAPI: {
-    getSingleAction: jest.fn(),
+jest.mock("@/src/services/action", () => ({
+  actionService: {
+    getAction: jest.fn(),
   },
 }));
 
-jest.mock("@/src/utils/apis/member", () => ({
-  memberAPI: {
-    getSingleMember: jest.fn(),
-  },
-}));
+const mockedActionService = actionService as jest.Mocked<typeof actionService>;
 
-const mockedActionAPI = actionAPI as jest.Mocked<typeof actionAPI>;
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
 const mockedNotFound = notFound as jest.MockedFunction<typeof notFound>;
 
 const mockAction = {
@@ -32,29 +25,24 @@ const mockAction = {
   ownerId: "member-1",
   status: ActionStatus.OPEN,
   dueDate: "2026-09-15",
-};
-
-const mockMember = {
-  id: "member-1",
-  name: "John Doe",
-  role: {
-    id: "role-1",
-    name: "Developer",
+  owner: {
+    id: "member-1",
+    name: "John Doe",
+    email: "john@email.com",
+    timezone: "UTC",
+    roleId: "role-1",
+    role: {
+      id: "role-1",
+      name: "Developer",
+    },
   },
-  timezone: "utc"
 };
 
 describe("ActionPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockedActionAPI.getSingleAction.mockResolvedValue({
-      action: mockAction,
-    });
-
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: mockMember,
-    });
+    mockedActionService.getAction.mockResolvedValue(mockAction);
   });
 
   it("fetches the action using the ID from params", async () => {
@@ -66,19 +54,7 @@ describe("ActionPage", () => {
 
     render(component);
 
-    expect(mockedActionAPI.getSingleAction).toHaveBeenCalledWith("action-1");
-  });
-
-  it("fetches the owner using the action ownerId", async () => {
-    const component = await ActionPage({
-      params: Promise.resolve({
-        id: "action-1",
-      }),
-    });
-
-    render(component);
-
-    expect(mockedMemberAPI.getSingleMember).toHaveBeenCalledWith("member-1");
+    expect(mockedActionService.getAction).toHaveBeenCalledWith("action-1");
   });
 
   it("renders the action title", async () => {
@@ -97,7 +73,7 @@ describe("ActionPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the OPEN status", async () => {
+  it("renders the Open status", async () => {
     const component = await ActionPage({
       params: Promise.resolve({
         id: "action-1",
@@ -107,14 +83,13 @@ describe("ActionPage", () => {
     render(component);
 
     expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.queryByText("Closed")).not.toBeInTheDocument();
   });
 
-  it("renders the CLOSED status when the action is closed", async () => {
-    mockedActionAPI.getSingleAction.mockResolvedValue({
-      action: {
-        ...mockAction,
-        status: ActionStatus.CLOSED,
-      },
+  it("renders the Closed status when the action is closed", async () => {
+    mockedActionService.getAction.mockResolvedValue({
+      ...mockAction,
+      status: ActionStatus.CLOSED,
     });
 
     const component = await ActionPage({
@@ -126,6 +101,7 @@ describe("ActionPage", () => {
     render(component);
 
     expect(screen.getByText("Closed")).toBeInTheDocument();
+    expect(screen.queryByText("Open")).not.toBeInTheDocument();
   });
 
   it("renders the action owner name", async () => {
@@ -138,22 +114,6 @@ describe("ActionPage", () => {
     render(component);
 
     expect(screen.getByText("John Doe")).toBeInTheDocument();
-  });
-
-  it("renders Unknown when the member cannot be found", async () => {
-    mockedMemberAPI.getSingleMember.mockResolvedValue({
-      member: null,
-    });
-
-    const component = await ActionPage({
-      params: Promise.resolve({
-        id: "action-1",
-      }),
-    });
-
-    render(component);
-
-    expect(screen.getByText("Unknown")).toBeInTheDocument();
   });
 
   it("renders the due date", async () => {
@@ -217,9 +177,7 @@ describe("ActionPage", () => {
   });
 
   it("calls notFound when the action does not exist", async () => {
-    mockedActionAPI.getSingleAction.mockResolvedValue({
-      action: null,
-    });
+    mockedActionService.getAction.mockResolvedValue(null);
 
     mockedNotFound.mockImplementation(() => {
       throw new Error("NEXT_NOT_FOUND");
@@ -233,8 +191,21 @@ describe("ActionPage", () => {
       }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
+    expect(mockedActionService.getAction).toHaveBeenCalledWith("action-1");
     expect(mockedNotFound).toHaveBeenCalledTimes(1);
+  });
 
-    expect(mockedMemberAPI.getSingleMember).not.toHaveBeenCalled();
+  it("throws when actionService encounters an error", async () => {
+    mockedActionService.getAction.mockRejectedValue(
+      new Error("Network Error!"),
+    );
+
+    await expect(
+      ActionPage({
+        params: Promise.resolve({
+          id: "action-1",
+        }),
+      }),
+    ).rejects.toThrow("Network Error!");
   });
 });

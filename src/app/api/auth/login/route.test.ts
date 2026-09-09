@@ -15,9 +15,17 @@ jest.mock("@/src/utils/session", () => ({
 
 const mockedVerifySession = jest.mocked(verifySession);
 
-describe("POST /auth/login", () => {
+const mockedAuthService = authService as jest.Mocked<typeof authService>;
+
+describe("POST /api/auth/login", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockedVerifySession.mockResolvedValue({
+      isAuth: false,
+      name: null,
+      id: null,
+    });
   });
 
   const createRequest = (body: unknown) =>
@@ -26,80 +34,134 @@ describe("POST /auth/login", () => {
       body: JSON.stringify(body),
     });
 
-  it("should return 400 when the request body is invalid", async () => {
-    mockedVerifySession.mockResolvedValue({
-      isAuth: false,
-      username: null,
+  describe("Successful Login", () => {
+    it("should call authService.login with valid credentials", async () => {
+      mockedAuthService.login.mockResolvedValue();
+
+      const req = createRequest({
+        username: "test@example.com",
+        password: "password123",
+      });
+
+      await POST(req);
+
+      expect(mockedAuthService.login).toHaveBeenCalledTimes(1);
+
+      expect(mockedAuthService.login).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123",
+      );
     });
-    const req = createRequest({
-      username: "",
-      password: "",
+
+    it("should return 200 when login is successful", async () => {
+      mockedAuthService.login.mockResolvedValue();
+
+      const req = createRequest({
+        username: "test@example.com",
+        password: "password123",
+      });
+
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+
+      expect(data).toEqual({});
     });
-
-    const response = await POST(req);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data).toHaveProperty("errors");
-
-    expect(authService.login).not.toHaveBeenCalled();
   });
 
-  it("should call authService.login with valid credentials", async () => {
-    mockedVerifySession.mockResolvedValue({
-      isAuth: false,
-      username: null,
+  describe("Authentication", () => {
+    it("should return 403 when the user is already logged in", async () => {
+      mockedVerifySession.mockResolvedValue({
+        isAuth: true,
+        name: "Test User",
+        id: "member-1",
+      });
+
+      const req = createRequest({
+        username: "test@example.com",
+        password: "password123",
+      });
+
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+
+      expect(data).toEqual({
+        errors: "You are already logged in.",
+      });
+
+      expect(mockedAuthService.login).not.toHaveBeenCalled();
     });
-    (authService.login as jest.Mock).mockResolvedValue(undefined);
-
-    const req = createRequest({
-      username: "test@example.com",
-      password: "password123",
-    });
-
-    await POST(req);
-
-    expect(authService.login).toHaveBeenCalledTimes(1);
-
-    expect(authService.login).toHaveBeenCalledWith(
-      "test@example.com",
-      "password123",
-    );
   });
 
-  it("should return 200 when login is successful", async () => {
-    mockedVerifySession.mockResolvedValue({
-      isAuth: false,
-      username: null,
+  describe("Validation", () => {
+    it("should return 400 when username and password are invalid", async () => {
+      const req = createRequest({
+        username: "",
+        password: "",
+      });
+
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+
+      expect(data.errors).toBeDefined();
+
+      expect(mockedAuthService.login).not.toHaveBeenCalled();
     });
-    (authService.login as jest.Mock).mockResolvedValue(undefined);
 
-    const req = createRequest({
-      username: "test@example.com",
-      password: "password123",
+    it("should return 400 when username is missing", async () => {
+      const req = createRequest({
+        password: "password123",
+      });
+
+      const response = await POST(req);
+
+      expect(response.status).toBe(400);
+
+      expect(mockedAuthService.login).not.toHaveBeenCalled();
     });
 
-    const response = await POST(req);
+    it("should return 400 when password is missing", async () => {
+      const req = createRequest({
+        username: "test@example.com",
+      });
 
-    expect(response.status).toBe(200);
+      const response = await POST(req);
+
+      expect(response.status).toBe(400);
+
+      expect(mockedAuthService.login).not.toHaveBeenCalled();
+    });
   });
 
-  it("should return 403 when the user is already logged in", async () => {
-    mockedVerifySession.mockResolvedValue({
-      isAuth: true,
-      username: "test@test.com",
+  describe("Server Error", () => {
+    it("should return 500 when login fails unexpectedly", async () => {
+      mockedAuthService.login.mockRejectedValue(new Error("Database error"));
+
+      const req = createRequest({
+        username: "test@example.com",
+        password: "password123",
+      });
+
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+
+      expect(data).toEqual({
+        errors: "Something went wrong. Please try again later.",
+      });
+
+      expect(mockedAuthService.login).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123",
+      );
+
+      expect(mockedAuthService.login).toHaveBeenCalledTimes(1);
     });
-    const req = createRequest({
-      username: "test@example.com",
-      password: "password123",
-    });
-
-    const response = await POST(req);
-    const data = await response.json();
-
-    expect(response.status).toBe(403);
-    expect(data).toHaveProperty("errors");
-
-    expect(authService.login).not.toHaveBeenCalled();
   });
 });

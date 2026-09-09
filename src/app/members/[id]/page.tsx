@@ -1,4 +1,4 @@
-import { memberAPI } from "@/src/utils/apis/member";
+import { memberService } from "@/src/services/member";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,13 +8,12 @@ export default async function MemberPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const data = await memberAPI.getSingleMember(id);
+  const member = await memberService.getMember(id);
 
-  if (!data.member) {
+  if (!member) {
     return notFound();
   }
 
-  const member = data.member;
   const initial = member.name.charAt(0).toUpperCase();
 
   return (
@@ -76,6 +75,7 @@ export default async function MemberPage({
             </h3>
 
             <dl className="divide-y divide-gray-100">
+              {/* Role */}
               <div className="flex items-center justify-between gap-6 py-4 first:pt-0">
                 <dt className="flex items-center gap-3 text-sm font-medium text-gray-500">
                   <div className="flex size-9 items-center justify-center rounded-lg bg-gray-100">
@@ -102,6 +102,7 @@ export default async function MemberPage({
                 </dd>
               </div>
 
+              {/* Email */}
               <div className="flex items-center justify-between gap-6 py-4">
                 <dt className="flex items-center gap-3 text-sm font-medium text-gray-500">
                   <div className="flex size-9 items-center justify-center rounded-lg bg-gray-100">
@@ -116,7 +117,34 @@ export default async function MemberPage({
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+                        d="M3 8.25 10.89 13.51a2.025 2.025 0 0 0 2.22 0L21 8.25M5.25 19.5h13.5A2.25 2.25 0 0 0 21 17.25V6.75a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Z"
+                      />
+                    </svg>
+                  </div>
+                  Email
+                </dt>
+
+                <dd className="text-right text-sm font-semibold text-gray-900">
+                  {member.email}
+                </dd>
+              </div>
+
+              {/* Timezone */}
+              <div className="flex items-center justify-between gap-6 py-4">
+                <dt className="flex items-center gap-3 text-sm font-medium text-gray-500">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-gray-100">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="size-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 18Z"
                       />
 
                       <path

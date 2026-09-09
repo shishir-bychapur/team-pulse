@@ -3,6 +3,7 @@
 import { authAPI } from "@/src/utils/apis/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
       router.refresh();
       router.push("/login");
     } catch (err) {
-      console.log(err);
+      toast.error("Error logging out!");
     }
   };
 

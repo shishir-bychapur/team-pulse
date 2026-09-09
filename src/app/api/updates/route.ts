@@ -1,11 +1,11 @@
-import { Update } from "../../../types/update";
 import { NextResponse } from "next/server";
 import { updateSchema } from "@/src/schema/update";
 import { updateService } from "@/src/services/update";
 import { verifySession } from "@/src/utils/session";
+import { UpdateWithMember } from "@/src/types/update";
 
 type GetResponseData = {
-  updates?: Update[];
+  updates?: UpdateWithMember[];
   errors?: string;
 };
 
@@ -23,7 +23,13 @@ export async function GET(
       { status: 401 },
     );
   }
-  const updates = updateService.getUpdates(new URL(req.url));
+
+  const url = new URL(req.url);
+  const updates = await updateService.getUpdates(
+    url.searchParams.getAll("members"),
+    url.searchParams.getAll("moods"),
+    url.searchParams.get("date"),
+  );
 
   return NextResponse.json({
     updates,
@@ -52,14 +58,14 @@ export async function POST(
   }
 
   try {
-    updateService.createUpdate(data);
+    await updateService.createUpdate(data);
     return NextResponse.json({}, { status: 200 });
   } catch (err) {
     return NextResponse.json(
       {
-        errors: "There is no member with the given memberId!",
+        errors: "Something went wrong. Please try again later.",
       },
-      { status: 403 },
+      { status: 500 },
     );
   }
 }

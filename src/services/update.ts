@@ -1,14 +1,16 @@
 import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
-import { Mood, Update } from "../types/update";
+import { Mood } from "@/generated/prisma/enums";
+import { Update } from "@/generated/prisma/client";
+import { MoodBreakdownResult, UpdateWithMember } from "../types/update";
 
 export const updateService = {
-  getUpdates: (url: URL): Update[] => {
-    let filteredMembers = url.searchParams.getAll("members");
-    let filteredMoods = url.searchParams.getAll("moods");
-    const date = url.searchParams.get("date");
-
-    const members = memberRepository.getMembers();
+  getUpdates: async (
+    filteredMembers: string[],
+    filteredMoods: string[],
+    date: string | null,
+  ): Promise<UpdateWithMember[]> => {
+    const members = await memberRepository.getMembers();
     const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
 
     if (!filteredMembers.length) {
@@ -19,12 +21,16 @@ export const updateService = {
       filteredMoods = moods;
     }
 
-    return updateRepository.getUpdates(filteredMembers, filteredMoods, date);
+    return await updateRepository.getUpdates(
+      filteredMembers,
+      filteredMoods.map((mood) => mood as Mood),
+      date,
+    );
   },
-  createUpdate: (update: Update): void => {
-    if (!memberRepository.getMember(update.memberId)) {
-      throw new Error("There is no member with the given memberId!");
-    }
-    updateRepository.createUpdate({ ...update, id: crypto.randomUUID() });
+  getMoodBreakdown: async (): Promise<MoodBreakdownResult[]> => {
+    return await updateRepository.getMoodBreakdown();
+  },
+  createUpdate: async (update: Update): Promise<void> => {
+    await updateRepository.createUpdate({ ...update, id: crypto.randomUUID() });
   },
 };

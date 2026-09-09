@@ -11,14 +11,18 @@ export async function POST(
   req: Request,
 ): Promise<NextResponse<PostResponseData>> {
   const session = await verifySession();
+
   if (session.isAuth) {
     return NextResponse.json(
       { errors: "You are already logged in." },
       { status: 403 },
     );
   }
+
   const data = await req.json();
+
   const validationResult = authSchema.safeParse(data);
+
   if (!validationResult.success) {
     return NextResponse.json(
       {
@@ -28,6 +32,16 @@ export async function POST(
     );
   }
 
-  await authService.login(data.username, data.password);
-  return NextResponse.json({}, { status: 200 });
+  try {
+    await authService.login(data.username, data.password);
+
+    return NextResponse.json({}, { status: 200 });
+  } catch {
+    return NextResponse.json(
+      {
+        errors: "Something went wrong. Please try again later.",
+      },
+      { status: 500 },
+    );
+  }
 }

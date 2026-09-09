@@ -1,17 +1,21 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Members from "./page";
-import { memberAPI } from "@/src/utils/apis/member";
-import { Member } from "@/src/types/member";
+import { memberService } from "@/src/services/member";
+import { MemberWithRole } from "@/src/types/member";
 
-jest.mock("@/src/utils/apis/member", () => ({
-  memberAPI: {
-    getAllMembers: jest.fn(),
+jest.mock("@/src/services/member", () => ({
+  memberService: {
+    getMembers: jest.fn(),
   },
 }));
 
 jest.mock("@/src/components/members/all-members", () => ({
-  AllMembers: function MockAllMembers({ members }: { members: Member[] }) {
+  AllMembers: function MockAllMembers({
+    members,
+  }: {
+    members: MemberWithRole[];
+  }) {
     return (
       <div data-testid="all-members">
         {members.map((member) => (
@@ -22,28 +26,32 @@ jest.mock("@/src/components/members/all-members", () => ({
   },
 }));
 
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+const mockedMemberService = memberService as jest.Mocked<typeof memberService>;
 
-const mockMembers = [
+const mockMembers: MemberWithRole[] = [
   {
     id: "1",
     name: "Alice",
+    email: "alice@email.com",
+    roleId: "role-1",
+    timezone: "Asia/Singapore",
     role: {
       id: "role-1",
       name: "Developer",
     },
-    timezone: "Asia/Singapore",
   },
   {
     id: "2",
     name: "Bob",
+    email: "bob@email.com",
+    roleId: "role-2",
+    timezone: "Asia/London",
     role: {
       id: "role-2",
       name: "Designer",
     },
-    timezone: "Asia/London",
   },
-] as Member[];
+];
 
 describe("Members Page", () => {
   beforeEach(() => {
@@ -51,14 +59,12 @@ describe("Members Page", () => {
   });
 
   it("fetches members and renders the page correctly", async () => {
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
+    mockedMemberService.getMembers.mockResolvedValue(mockMembers);
 
     const ResolvedMembers = await Members();
     render(ResolvedMembers);
 
-    expect(mockedMemberAPI.getAllMembers).toHaveBeenCalledTimes(1);
+    expect(mockedMemberService.getMembers).toHaveBeenCalledTimes(1);
 
     expect(
       screen.getByRole("heading", { name: "Members" }),
@@ -75,9 +81,7 @@ describe("Members Page", () => {
   });
 
   it("passes the fetched members to the AllMembers component", async () => {
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
+    mockedMemberService.getMembers.mockResolvedValue(mockMembers);
 
     const ResolvedMembers = await Members();
     render(ResolvedMembers);
@@ -90,8 +94,10 @@ describe("Members Page", () => {
   });
 
   it("throws an error when fetching members fails", async () => {
-    mockedMemberAPI.getAllMembers.mockRejectedValue(new Error("Network Error"));
+    mockedMemberService.getMembers.mockRejectedValue(
+      new Error("Database Error"),
+    );
 
-    await expect(Members()).rejects.toThrow("Network Error");
+    await expect(Members()).rejects.toThrow("Database Error");
   });
 });

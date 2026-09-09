@@ -1,7 +1,5 @@
-export enum ActionStatus {
-  OPEN = "Open",
-  CLOSED = "Closed",
-}
+import { Member } from "@/generated/prisma/client";
+import { ActionStatus } from "@/generated/prisma/enums";
 
 export interface ActionItem {
   id: string;
@@ -9,4 +7,13 @@ export interface ActionItem {
   ownerId: string;
   status: ActionStatus;
   dueDate: string;
+}
+
+export interface ActionItemWithOwner {
+  id: string;
+  title: string;
+  ownerId: string;
+  status: ActionStatus;
+  dueDate: string;
+  owner: Member;
 }

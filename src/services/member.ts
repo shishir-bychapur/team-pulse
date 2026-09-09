@@ -1,11 +1,11 @@
 import { memberRepository } from "../repositories/member";
-import { Member } from "../types/member";
+import { MemberWithRole } from "../types/member";
 
 export const memberService = {
-  getMembers: (): Member[] => {
+  getMembers: (): Promise<MemberWithRole[]> => {
     return memberRepository.getMembers();
   },
-  getMember: (id: string): Member | undefined => {
+  getMember: (id: string): Promise<MemberWithRole | null> => {
     return memberRepository.getMember(id);
   },
 };

@@ -15,7 +15,8 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: Session): Promise<string> {
   return new SignJWT({
-    username: payload.username,
+    id: payload.id,
+    name: payload.name,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -31,7 +32,10 @@ export async function decrypt(
       algorithms: ["HS256"],
     });
 
-    if (typeof payload.username !== "string") {
+    if (
+      typeof payload.id !== "string" ||
+      typeof payload.name !== "string"
+    ) {
       return null;
     }
 
@@ -42,11 +46,15 @@ export async function decrypt(
   }
 }
 
-export async function createSession(username: string): Promise<void> {
+export async function createSession(
+  id: string,
+  name: string,
+): Promise<void> {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const session = await encrypt({
-    username,
+    id,
+    name,
     expiresAt,
   });
 
@@ -75,12 +83,14 @@ export const verifySession = cache(async (): Promise<VerifySessionResult> => {
   if (!session) {
     return {
       isAuth: false,
-      username: null,
+      id: null,
+      name: null,
     };
   }
 
   return {
     isAuth: true,
-    username: session.username,
+    id: session.id,
+    name: session.name,
   };
 });

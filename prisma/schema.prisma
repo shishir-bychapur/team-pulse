@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Role {
+  id      String   @id
+  name    String   @unique
+  members Member[]
+}
+
+model Member {
+  id       String       @id
+  name     String
+  timezone String
+  roleId   String
+  actions  ActionItem[]
+  role     Role         @relation(fields: [roleId], references: [id])
+  updates  Update[]
+  email    String       @unique     
+}
+
+model Update {
+  id       String @id
+  memberId String
+  date     String
+  text     String
+  mood     Mood
+  member   Member @relation(fields: [memberId], references: [id])
+}
+
+model ActionItem {
+  id      String       @id
+  title   String
+  ownerId String
+  status  ActionStatus
+  dueDate String
+  owner   Member       @relation(fields: [ownerId], references: [id])
+}
+
+enum Mood {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum ActionStatus {
+  OPEN
+  CLOSED
+}

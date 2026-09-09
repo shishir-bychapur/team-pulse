@@ -1,250 +1,151 @@
 import "@testing-library/jest-dom";
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
-import Updates from "./page";
-import { Dispatch, SetStateAction } from "react";
-import { Mood, Update } from "@/src/types/update";
-import { memberAPI } from "@/src/utils/apis/member";
-import { updateAPI } from "@/src/utils/apis/update";
+import { render, screen } from "@testing-library/react";
+import UpdatePage from "./page";
+import { memberService } from "@/src/services/member";
+import { verifySession } from "@/src/utils/session";
+import { MemberWithRole } from "@/src/types/member";
 
-jest.mock("../../components/filters/member-filter", () => {
-  return function MockMemberFilter({
-    setFilter,
-  }: {
-    setFilter: Dispatch<SetStateAction<string[]>>;
-  }) {
-    return (
-      <button
-        data-testid="member-filter-btn"
-        onClick={() => setFilter(["member-1"])}
-      >
-        Filter Member
-      </button>
-    );
-  };
-});
-
-jest.mock("../../components/filters/mood-filter", () => {
-  return function MockMoodFilter({
-    setFilter,
-  }: {
-    setFilter: Dispatch<SetStateAction<string[]>>;
-  }) {
-    return (
-      <button
-        data-testid="mood-filter-btn"
-        onClick={() => setFilter(["happy"])}
-      >
-        Filter Mood
-      </button>
-    );
-  };
-});
-
-jest.mock("../../components/filters/date-filter", () => {
-  return function MockDateFilter({
-    setFilter,
-  }: {
-    setFilter: Dispatch<SetStateAction<string>>;
-  }) {
-    return (
-      <button
-        data-testid="date-filter-btn"
-        onClick={() => setFilter("2026-03-01")}
-      >
-        Filter Date
-      </button>
-    );
-  };
-});
-
-jest.mock("../../components/updates/update", () => {
-  return function MockUpdateCard({
-    update,
-    memberName,
-  }: {
-    update: Update;
-    memberName: string;
-  }) {
-    return (
-      <li data-testid="update-card">
-        {update.text} - {memberName}
-      </li>
-    );
-  };
-});
-
-jest.mock("@/src/utils/apis/member", () => ({
-  memberAPI: {
-    getAllMembers: jest.fn(),
+jest.mock("@/src/services/member", () => ({
+  memberService: {
+    getMembers: jest.fn(),
   },
 }));
 
-jest.mock("@/src/utils/apis/update", () => ({
-  updateAPI: {
-    getUpdates: jest.fn(),
-  },
+jest.mock("@/src/utils/session", () => ({
+  verifySession: jest.fn(),
 }));
 
-const mockMembers = [
-  {
-    id: "member-1",
-    name: "Alice",
-    role: { id: "role-1", name: "Developer" },
-    timezone: "UTC",
-  },
-  {
-    id: "member-2",
-    name: "Bob",
-    role: { id: "role-1", name: "Developer" },
-    timezone: "UTC",
-  },
-];
+jest.mock("@/src/components/updates/updates", () => {
+  return function MockUpdates({
+    members,
+    userId,
+  }: {
+    members: MemberWithRole[];
+    userId: string;
+  }) {
+    return (
+      <div data-testid="updates-component">
+        <span data-testid="members-count">{members.length}</span>
+        <span data-testid="user-id">{userId}</span>
+      </div>
+    );
+  };
+});
 
-const mockUpdates: Update[] = [
-  {
-    id: "update-1",
-    memberId: "member-1",
-    text: "Finished feature A",
-    date: "2026-09-01",
-    mood: Mood.RED,
-  },
-  {
-    id: "update-2",
-    memberId: "member-2",
-    text: "Working on bug B",
-    date: "2026-09-02",
-    mood: Mood.GREEN,
-  },
-];
+const mockedMemberService = memberService as jest.Mocked<typeof memberService>;
 
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
-const mockedUpdateAPI = updateAPI as jest.Mocked<typeof updateAPI>;
+const mockedVerifySession = jest.mocked(verifySession);
 
-describe("Updates Page", () => {
+describe("UpdatePage", () => {
+  const mockMembers: MemberWithRole[] = [
+    {
+      id: "member-1",
+      name: "Tom",
+      timezone: "Asia/Singapore",
+      roleId: "role-1",
+      role: {
+        id: "role-1",
+        name: "Developer",
+      },
+      email: "tom@email.com",
+    },
+    {
+      id: "member-2",
+      name: "Harry",
+      timezone: "Europe/London",
+      roleId: "role-2",
+      role: {
+        id: "role-2",
+        name: "Designer",
+      },
+      email: "harry@email.com",
+    },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockedMemberService.getMembers.mockResolvedValue(mockMembers);
+
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      id: "member-1",
+      name: "Tom",
+    });
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
+  it("renders the page heading and description", async () => {
+    const component = await UpdatePage();
 
-  it("renders static text elements", async () => {
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
-    mockedUpdateAPI.getUpdates.mockResolvedValue({
-      updates: mockUpdates,
-    });
+    render(component);
 
-    await act(async () => {
-      render(<Updates />);
-    });
-
-    expect(screen.getByText("Updates")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Updates" }),
+    ).toBeInTheDocument();
 
     expect(
       screen.getByText("Keep track of your team's latest updates."),
     ).toBeInTheDocument();
-
-    expect(screen.getByText("Filter updates")).toBeInTheDocument();
-
-    expect(
-      screen.getByText(
-        "Filter by member, mood, or date to find specific updates.",
-      ),
-    ).toBeInTheDocument();
-
-    expect(screen.getByText("Recent updates")).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("link", { name: "+ Create Update" }),
-    ).toBeInTheDocument();
   });
 
-  it("fetches members and updates on initial render", async () => {
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
-    mockedUpdateAPI.getUpdates.mockResolvedValue({
-      updates: mockUpdates,
-    });
+  it("renders the create update link", async () => {
+    const component = await UpdatePage();
 
-    await act(async () => {
-      render(<Updates />);
+    render(component);
+
+    const link = screen.getByRole("link", {
+      name: "+ Create Update",
     });
 
-    const cardItems = await screen.findAllByTestId("update-card");
-
-    expect(cardItems).toHaveLength(2);
-
-    expect(screen.getByText("Finished feature A - Alice")).toBeInTheDocument();
-
-    expect(screen.getByText("Working on bug B - Bob")).toBeInTheDocument();
-
-    expect(screen.getByText("2 updates")).toBeInTheDocument();
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/updates/new");
   });
 
-  it("triggers a new fetch with query params when filters change", async () => {
-    mockedMemberAPI.getAllMembers.mockResolvedValue({
-      members: mockMembers,
-    });
-    mockedUpdateAPI.getUpdates.mockResolvedValue({
-      updates: mockUpdates,
-    });
-    render(<Updates />);
+  it("fetches all members", async () => {
+    const component = await UpdatePage();
 
-    fireEvent.click(screen.getByTestId("member-filter-btn"));
+    render(component);
 
-    await waitFor(() => {
-      expect(updateAPI.getUpdates).toHaveBeenCalledWith("members=member-1");
-    });
-
-    fireEvent.click(screen.getByTestId("mood-filter-btn"));
-
-    await waitFor(() => {
-      expect(updateAPI.getUpdates).toHaveBeenCalledWith(
-        "members=member-1&moods=happy",
-      );
-    });
-
-    fireEvent.click(screen.getByTestId("date-filter-btn"));
-
-    await waitFor(() => {
-      expect(updateAPI.getUpdates).toHaveBeenCalledWith(
-        "members=member-1&moods=happy&date=2026-03-01",
-      );
-    });
+    expect(mockedMemberService.getMembers).toHaveBeenCalledTimes(1);
   });
 
-  it("handles API errors gracefully without crashing", async () => {
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+  it("verifies the user session", async () => {
+    const component = await UpdatePage();
 
-    mockedMemberAPI.getAllMembers.mockRejectedValue(new Error("Network Error"));
-    mockedUpdateAPI.getUpdates.mockRejectedValue(new Error("Network Error"));
+    render(component);
 
-    render(<Updates />);
+    expect(mockedVerifySession).toHaveBeenCalledTimes(1);
+  });
 
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error fetching members:",
-        expect.any(Error),
-      );
+  it("passes members to the Updates component", async () => {
+    const component = await UpdatePage();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error fetching updates:",
-        expect.any(Error),
-      );
+    render(component);
+
+    expect(screen.getByTestId("updates-component")).toBeInTheDocument();
+
+    expect(screen.getByTestId("members-count")).toHaveTextContent("2");
+  });
+
+  it("passes the session user id to the Updates component", async () => {
+    const component = await UpdatePage();
+
+    render(component);
+
+    expect(screen.getByTestId("user-id")).toHaveTextContent("member-1");
+  });
+
+  it("passes an empty string when the session has no user id", async () => {
+    mockedVerifySession.mockResolvedValue({
+      isAuth: true,
+      id: null,
+      name: null,
     });
 
-    consoleSpy.mockRestore();
+    const component = await UpdatePage();
+
+    render(component);
+
+    expect(screen.getByTestId("user-id")).toHaveTextContent("");
   });
 });
