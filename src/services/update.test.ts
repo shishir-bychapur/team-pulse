@@ -5,6 +5,12 @@ import { Update } from "@/generated/prisma/client";
 import { Mood } from "@/generated/prisma/enums";
 import { MemberWithRole } from "../types/member";
 import { UpdateWithMember } from "../types/update";
+import { revalidateTag } from "next/cache";
+
+jest.mock("next/cache", () => ({
+  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T): T => fn,
+  revalidateTag: jest.fn(),
+}));
 
 jest.mock("../repositories/member", () => ({
   memberRepository: {
@@ -26,6 +32,10 @@ const mockedMemberRepository = memberRepository as jest.Mocked<
 
 const mockedUpdateRepository = updateRepository as jest.Mocked<
   typeof updateRepository
+>;
+
+const mockedRevalidateTag = revalidateTag as jest.MockedFunction<
+  typeof revalidateTag
 >;
 
 describe("Update Service", () => {
@@ -265,7 +275,7 @@ describe("Update Service", () => {
   });
 
   describe("Create Update", () => {
-    it("should generate an ID and create an update successfully", async () => {
+    it("should generate an ID, create an update, and revalidate the cache", async () => {
       const mockUpdate: Update = {
         id: "old-id",
         memberId: "member-1",
@@ -288,6 +298,9 @@ describe("Update Service", () => {
       });
 
       expect(mockedUpdateRepository.createUpdate).toHaveBeenCalledTimes(1);
+
+      expect(mockedRevalidateTag).toHaveBeenCalledWith("updates", "max");
+      expect(mockedRevalidateTag).toHaveBeenCalledTimes(1);
     });
 
     it("should replace the existing ID with a newly generated UUID", async () => {
@@ -311,9 +324,11 @@ describe("Update Service", () => {
         ...mockUpdate,
         id: mockUUID,
       });
+
+      expect(mockedRevalidateTag).toHaveBeenCalledWith("updates", "max");
     });
 
-    it("should throw an error when creating the update fails", async () => {
+    it("should not revalidate the cache when creating the update fails", async () => {
       const mockUpdate: Update = {
         id: "",
         memberId: "member-1",
@@ -331,6 +346,8 @@ describe("Update Service", () => {
       await expect(updateService.createUpdate(mockUpdate)).rejects.toThrow(
         "Failed to create update",
       );
+
+      expect(mockedRevalidateTag).not.toHaveBeenCalled();
     });
   });
 });
