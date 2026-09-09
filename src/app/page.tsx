@@ -6,6 +6,7 @@ import { dateFormat } from "../utils/date";
 import MoodBreakdown from "../components/moods/mood";
 import OpenActions from "../components/actions/open-actions";
 import UpdatesToday from "../components/updates/updates-today";
+import { verifySession } from "../utils/session";
 
 export default async function Dashboard() {
   const openActions = await actionService.getActionsByStatus(ActionStatus.OPEN);
@@ -15,6 +16,7 @@ export default async function Dashboard() {
     (total, current) => total + current._count.mood,
     0,
   );
+  const session = await verifySession();
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
@@ -25,8 +27,8 @@ export default async function Dashboard() {
           </h1>
 
           <p className="mt-2 text-sm text-gray-500 sm:text-base">
-            Get a quick overview of your team&apos;s updates, actions, and
-            overall mood.
+            Hi, {session.name}! Get a quick overview of your team&apos;s
+            updates, actions, and overall mood.
           </p>
         </div>
 

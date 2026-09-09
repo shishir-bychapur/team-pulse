@@ -1,15 +1,31 @@
+import { ActionStatus } from "@/generated/prisma/enums";
+import { prisma } from "@/prisma/prisma";
 import { ActionItem } from "../types/action";
 import { actionRepository } from "./action";
-import { actionItems } from "../data/action";
-import { ActionStatus } from "@/generated/prisma/enums";
 
-const mockActionItems: ActionItem[] = [
+jest.mock("@/prisma/prisma", () => ({
+  prisma: {
+    actionItem: {
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      count: jest.fn(),
+    },
+  },
+}));
+
+const mockActionItems = [
   {
     id: "1",
     title: "Fix login bug",
     ownerId: "member-1",
     status: ActionStatus.OPEN,
     dueDate: "2026-09-10",
+    owner: {
+      id: "member-1",
+      name: "Tom",
+    },
   },
   {
     id: "2",
@@ -17,50 +33,78 @@ const mockActionItems: ActionItem[] = [
     ownerId: "member-2",
     status: ActionStatus.CLOSED,
     dueDate: "2026-09-15",
+    owner: {
+      id: "member-2",
+      name: "John",
+    },
   },
 ];
 
-jest.mock("../data/action", () => ({
-  actionItems: [],
-}));
-
 describe("Action Repository", () => {
   beforeEach(() => {
-    actionItems.length = 0;
-    actionItems.push(...mockActionItems);
+    jest.clearAllMocks();
   });
 
   describe("Get Actions", () => {
-    it("should return all actions", () => {
-      const data = actionRepository.getActions();
+    it("should return all actions", async () => {
+      jest
+        .mocked(prisma.actionItem.findMany)
+        .mockResolvedValue(mockActionItems as never);
 
-      expect(data).toHaveLength(2);
+      const data = await actionRepository.getActions();
+
       expect(data).toEqual(mockActionItems);
+
+      expect(prisma.actionItem.findMany).toHaveBeenCalledWith({
+        include: {
+          owner: true,
+        },
+      });
     });
   });
 
   describe("Get Action", () => {
-    it("should return the correct action when the id exists", () => {
-      const data = actionRepository.getAction("1");
+    it("should return the correct action when the id exists", async () => {
+      const mockAction = mockActionItems[0];
 
-      expect(data).toEqual({
-        id: "1",
-        title: "Fix login bug",
-        ownerId: "member-1",
-        status: ActionStatus.OPEN,
-        dueDate: "2026-09-10",
+      jest
+        .mocked(prisma.actionItem.findFirst)
+        .mockResolvedValue(mockAction as never);
+
+      const data = await actionRepository.getAction("1");
+
+      expect(data).toEqual(mockAction);
+
+      expect(prisma.actionItem.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: "1",
+        },
+        include: {
+          owner: true,
+        },
       });
     });
 
-    it("should return undefined when the id does not exist", () => {
-      const data = actionRepository.getAction("999");
+    it("should return null when the action does not exist", async () => {
+      jest.mocked(prisma.actionItem.findFirst).mockResolvedValue(null);
 
-      expect(data).toBeUndefined();
+      const data = await actionRepository.getAction("999");
+
+      expect(data).toBeNull();
+
+      expect(prisma.actionItem.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: "999",
+        },
+        include: {
+          owner: true,
+        },
+      });
     });
   });
 
   describe("Create Action", () => {
-    it("should create an action successfully", () => {
+    it("should create an action successfully", async () => {
       const mockAction: ActionItem = {
         id: "3",
         title: "Implement dashboard",
@@ -69,17 +113,20 @@ describe("Action Repository", () => {
         dueDate: "2026-09-20",
       };
 
-      expect(actionItems).toHaveLength(2);
+      jest
+        .mocked(prisma.actionItem.create)
+        .mockResolvedValue(mockAction as never);
 
-      actionRepository.createAction(mockAction);
+      await actionRepository.createAction(mockAction);
 
-      expect(actionItems).toHaveLength(3);
-      expect(actionItems).toContainEqual(mockAction);
+      expect(prisma.actionItem.create).toHaveBeenCalledWith({
+        data: mockAction,
+      });
     });
   });
 
   describe("Edit Action", () => {
-    it("should edit an action successfully", () => {
+    it("should edit an action successfully", async () => {
       const updatedAction: ActionItem = {
         id: "999",
         title: "Fix login bug - updated",
@@ -88,33 +135,37 @@ describe("Action Repository", () => {
         dueDate: "2026-09-30",
       };
 
-      const index = actionRepository.editAction("1", updatedAction);
+      jest
+        .mocked(prisma.actionItem.update)
+        .mockResolvedValue(updatedAction as never);
 
-      expect(index).toBe(0);
+      await actionRepository.editAction("1", updatedAction);
 
-      expect(actionItems[0]).toEqual({
-        id: "1",
-        title: "Fix login bug - updated",
-        ownerId: "member-2",
-        status: ActionStatus.CLOSED,
-        dueDate: "2026-09-30",
+      expect(prisma.actionItem.update).toHaveBeenCalledWith({
+        where: {
+          id: "1",
+          ownerId: "member-2",
+        },
+        data: updatedAction,
       });
     });
+  });
 
-    it("should return -1 when the action does not exist", () => {
-      const updatedAction: ActionItem = {
-        id: "999",
-        title: "Does not exist",
-        ownerId: "member-1",
-        status: ActionStatus.OPEN,
-        dueDate: "2026-09-30",
-      };
+  describe("Count Actions By Status", () => {
+    it("should return the correct count for a status", async () => {
+      jest.mocked(prisma.actionItem.count).mockResolvedValue(3);
 
-      const index = actionRepository.editAction("999", updatedAction);
+      const data = await actionRepository.countActionsByStatus(
+        ActionStatus.OPEN,
+      );
 
-      expect(index).toBe(-1);
+      expect(data).toBe(3);
 
-      expect(actionItems).toEqual(mockActionItems);
+      expect(prisma.actionItem.count).toHaveBeenCalledWith({
+        where: {
+          status: ActionStatus.OPEN,
+        },
+      });
     });
   });
 });
