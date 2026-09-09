@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { memberService } from "@/src/services/member";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 
 jest.mock("@/src/services/member", () => ({
   memberService: {
@@ -19,7 +19,7 @@ describe("GET /api/members/[id]", () => {
   });
 
   it("should return status 200 and member details when member exists", async () => {
-    const mockMember: Member = {
+    const mockMember: MemberWithRole = {
       id: "1",
       name: "Tom",
       timezone: "America/New_York",
@@ -27,9 +27,10 @@ describe("GET /api/members/[id]", () => {
         id: "r1",
         name: "Developer",
       },
+      roleId: "r1",
     };
 
-    mockedMemberService.getMember.mockReturnValue(mockMember);
+    mockedMemberService.getMember.mockReturnValue(Promise.resolve(mockMember));
 
     const req = new NextRequest(`${baseUrl}/1`);
     const params = Promise.resolve({ id: "1" });
@@ -49,7 +50,7 @@ describe("GET /api/members/[id]", () => {
   });
 
   it("should return status 404 and null when member is not found", async () => {
-    mockedMemberService.getMember.mockReturnValue(undefined);
+    mockedMemberService.getMember.mockReturnValue(Promise.resolve(null));
 
     const req = new NextRequest(`${baseUrl}/non-existent-id`);
 

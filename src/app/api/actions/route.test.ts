@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
-import { ActionItem } from "@/src/types/action";
 import { ActionStatus } from "@/generated/prisma/enums";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
+import { ActionItemWithOwner } from "@/src/types/action";
 
 jest.mock("@/src/services/action", () => ({
   actionService: {
@@ -32,13 +32,19 @@ describe("GET /api/actions", () => {
   });
 
   it("should return all actions successfully", async () => {
-    const mockActions: ActionItem[] = [
+    const mockActions: ActionItemWithOwner[] = [
       {
         id: "act-1",
         title: "Setup CI pipeline",
         ownerId: "member-1",
         status: ActionStatus.OPEN,
         dueDate: "2026-09-17",
+        owner: {
+          name: "Jake",
+          id: "member-1",
+          roleId: "role-1",
+          timezone: "utc",
+        },
       },
       {
         id: "act-2",
@@ -46,10 +52,18 @@ describe("GET /api/actions", () => {
         ownerId: "member-2",
         status: ActionStatus.CLOSED,
         dueDate: "2026-09-21",
+        owner: {
+          name: "Jose",
+          id: "member-2",
+          roleId: "role-1",
+          timezone: "utc",
+        },
       },
     ];
 
-    mockedActionService.getActions.mockReturnValue(Promise.resolve(mockActions));
+    mockedActionService.getActions.mockReturnValue(
+      Promise.resolve(mockActions),
+    );
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);
@@ -116,7 +130,9 @@ describe("POST /api/actions", () => {
   };
 
   it("should create an action successfully", async () => {
-    mockedActionService.createAction.mockReturnValue("generated-action-id");
+    mockedActionService.createAction.mockReturnValue(
+      Promise.resolve("generated-action-id"),
+    );
 
     const req = new NextRequest(baseUrl, {
       method: "POST",
@@ -260,7 +276,9 @@ describe("POST /api/actions", () => {
       username: null,
     });
 
-    mockedActionService.createAction.mockReturnValue("generated-action-id");
+    mockedActionService.createAction.mockReturnValue(
+      Promise.resolve("generated-action-id"),
+    );
 
     const req = new NextRequest(baseUrl, {
       method: "POST",

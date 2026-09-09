@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { memberService } from "@/src/services/member";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 
 jest.mock("@/src/services/member", () => ({
   memberService: {
@@ -19,7 +19,7 @@ describe("GET /api/members", () => {
   });
 
   it("should return all members successfully", async () => {
-    const mockMembers: Member[] = [
+    const mockMembers: MemberWithRole[] = [
       {
         id: "1",
         name: "Tom",
@@ -28,6 +28,7 @@ describe("GET /api/members", () => {
           id: "r1",
           name: "Developer",
         },
+        roleId: "r1",
       },
       {
         id: "2",
@@ -37,10 +38,13 @@ describe("GET /api/members", () => {
           id: "r2",
           name: "Designer",
         },
+        roleId: "r2",
       },
     ];
 
-    mockedMemberService.getMembers.mockReturnValue(mockMembers);
+    mockedMemberService.getMembers.mockReturnValue(
+      Promise.resolve(mockMembers),
+    );
 
     const req = new NextRequest(baseUrl);
 
@@ -57,7 +61,7 @@ describe("GET /api/members", () => {
   });
 
   it("should return an empty array when there are no members", async () => {
-    mockedMemberService.getMembers.mockReturnValue([]);
+    mockedMemberService.getMembers.mockReturnValue(Promise.resolve([]));
 
     const req = new NextRequest(baseUrl);
 

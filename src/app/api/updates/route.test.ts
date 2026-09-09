@@ -49,7 +49,9 @@ describe("GET /api/updates", () => {
       },
     ];
 
-    mockedUpdateService.getUpdates.mockReturnValue(mockUpdates);
+    mockedUpdateService.getUpdates.mockReturnValue(
+      Promise.resolve(mockUpdates),
+    );
 
     const req = new NextRequest(baseUrl);
 
@@ -70,7 +72,7 @@ describe("GET /api/updates", () => {
       isAuth: false,
       username: null,
     });
-    mockedUpdateService.getUpdates.mockReturnValue([]);
+    mockedUpdateService.getUpdates.mockReturnValue(Promise.resolve([]));
 
     const req = new NextRequest(baseUrl);
 
@@ -81,7 +83,7 @@ describe("GET /api/updates", () => {
   });
 
   it("should pass the request URL to the update service", async () => {
-    mockedUpdateService.getUpdates.mockReturnValue([]);
+    mockedUpdateService.getUpdates.mockReturnValue(Promise.resolve([]));
 
     const req = new NextRequest(
       `${baseUrl}?members=member-1&moods=GREEN&date=2026-09-01`,

@@ -31,25 +31,8 @@ describe("GET /api/actions/count", () => {
   });
 
   it("should return open status actions successfully", async () => {
-    const mockActions: ActionItem[] = [
-      {
-        id: "act-1",
-        title: "Setup CI pipeline",
-        ownerId: "member-1",
-        status: ActionStatus.OPEN,
-        dueDate: "2026-09-17",
-      },
-      {
-        id: "act-2",
-        title: "Design dashboard",
-        ownerId: "member-2",
-        status: ActionStatus.CLOSED,
-        dueDate: "2026-09-21",
-      },
-    ];
-
-    mockedActionService.getActionsByStatus.mockReturnValue([mockActions[0]]);
-    const req = new NextRequest(baseUrl + "?status=Open");
+    mockedActionService.getActionsByStatus.mockReturnValue(Promise.resolve(1));
+    const req = new NextRequest(baseUrl + "?status=OPEN");
 
     const response = await GET(req);
     const data = await response.json();
@@ -81,8 +64,8 @@ describe("GET /api/actions/count", () => {
       },
     ];
 
-    mockedActionService.getActionsByStatus.mockReturnValue([mockActions[1]]);
-    const req = new NextRequest(baseUrl + "?status=Closed");
+    mockedActionService.getActionsByStatus.mockReturnValue(Promise.resolve(1));
+    const req = new NextRequest(baseUrl + "?status=CLOSED");
 
     const response = await GET(req);
     const data = await response.json();
@@ -97,7 +80,7 @@ describe("GET /api/actions/count", () => {
   });
 
   it("should return 400 if status query is incorrect", async () => {
-    mockedActionService.getActionsByStatus.mockReturnValue([]);
+    mockedActionService.getActionsByStatus.mockReturnValue(Promise.resolve(0));
     const req = new NextRequest(baseUrl + "?status=Missing");
 
     const response = await GET(req);
@@ -107,7 +90,7 @@ describe("GET /api/actions/count", () => {
   });
 
   it("should return 400 if status query is missing", async () => {
-    mockedActionService.getActionsByStatus.mockReturnValue([]);
+    mockedActionService.getActionsByStatus.mockReturnValue(Promise.resolve(0));
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);
@@ -122,7 +105,7 @@ describe("GET /api/actions/count", () => {
       username: null,
     });
 
-    mockedActionService.getActionsByStatus.mockReturnValue([]);
+    mockedActionService.getActionsByStatus.mockReturnValue(Promise.resolve(0));
     const req = new NextRequest(baseUrl);
 
     const response = await GET(req);

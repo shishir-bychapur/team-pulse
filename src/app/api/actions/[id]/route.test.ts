@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { GET, PATCH } from "./route";
-import { ActionItem, ActionStatus } from "@/src/types/action";
 import { actionService } from "@/src/services/action";
 import { verifySession } from "@/src/utils/session";
+import { ActionStatus } from "@/generated/prisma/enums";
+import { ActionItemWithOwner } from "@/src/types/action";
 
 jest.mock("@/src/services/action", () => ({
   actionService: {
@@ -30,15 +31,21 @@ describe("GET /api/actions/[id]", () => {
   });
 
   it("should return status 200 and the action when it exists", async () => {
-    const mockAction: ActionItem = {
+    const mockAction: ActionItemWithOwner = {
       id: "act-1",
       title: "Setup CI pipeline",
       ownerId: "member-1",
       status: ActionStatus.OPEN,
       dueDate: "2026-09-17",
+      owner: {
+        name: "Jake",
+        id: "member-1",
+        roleId: "role-1",
+        timezone: "utc",
+      },
     };
 
-    mockedActionService.getAction.mockReturnValue(mockAction);
+    mockedActionService.getAction.mockReturnValue(Promise.resolve(mockAction));
 
     const req = new NextRequest(`${baseUrl}/act-1`);
     const params = Promise.resolve({ id: "act-1" });
@@ -58,7 +65,7 @@ describe("GET /api/actions/[id]", () => {
   });
 
   it("should return status 404 and null when the action does not exist", async () => {
-    mockedActionService.getAction.mockReturnValue(undefined);
+    mockedActionService.getAction.mockReturnValue(Promise.resolve(null));
 
     const req = new NextRequest(`${baseUrl}/invalid-id`);
 
@@ -111,7 +118,7 @@ describe("PATCH /api/actions/[id]", () => {
   };
 
   it("should update an existing action successfully", async () => {
-    mockedActionService.editAction.mockReturnValue(0);
+    mockedActionService.editAction.mockReturnValue(Promise.resolve());
 
     const req = new NextRequest(`${baseUrl}/act-1`, {
       method: "PATCH",
@@ -247,7 +254,7 @@ describe("PATCH /api/actions/[id]", () => {
   });
 
   it("should return 404 when the action does not exist", async () => {
-    mockedActionService.editAction.mockReturnValue(-1);
+    mockedActionService.editAction.mockReturnValue(Promise.resolve());
 
     const req = new NextRequest(`${baseUrl}/invalid-id`, {
       method: "PATCH",

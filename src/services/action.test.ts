@@ -1,7 +1,8 @@
 import { actionService } from "./action";
 import { actionRepository } from "../repositories/action";
 import { memberRepository } from "../repositories/member";
-import { ActionItem, ActionStatus } from "../types/action";
+import { ActionStatus } from "@/generated/prisma/enums";
+import { ActionItemWithOwner } from "../types/action";
 
 jest.mock("../repositories/action", () => ({
   actionRepository: {
@@ -31,17 +32,23 @@ describe("Action Service", () => {
     jest.clearAllMocks();
   });
 
-  const mockAction: ActionItem = {
+  const mockAction: ActionItemWithOwner = {
     id: "action-1",
     title: "Fix login bug",
     ownerId: "member-1",
     status: ActionStatus.OPEN,
     dueDate: "2026-09-10",
+    owner: {
+      name: "Jake",
+      roleId: "role-1",
+      timezone: "utc",
+      id: "member-1",
+    },
   };
 
   describe("Get Actions", () => {
     it("should return all actions", () => {
-      const mockActions: ActionItem[] = [
+      const mockActions: ActionItemWithOwner[] = [
         mockAction,
         {
           id: "action-2",
@@ -49,10 +56,18 @@ describe("Action Service", () => {
           ownerId: "member-2",
           status: ActionStatus.CLOSED,
           dueDate: "2026-09-15",
+          owner: {
+            name: "Jose",
+            roleId: "role-2",
+            timezone: "utc",
+            id: "member-2",
+          },
         },
       ];
 
-      mockedActionRepository.getActions.mockReturnValue(mockActions);
+      mockedActionRepository.getActions.mockReturnValue(
+        Promise.resolve(mockActions),
+      );
 
       const result = actionService.getActions();
 
@@ -64,7 +79,9 @@ describe("Action Service", () => {
 
   describe("Get Action", () => {
     it("should return an action when it exists", () => {
-      mockedActionRepository.getAction.mockReturnValue(mockAction);
+      mockedActionRepository.getAction.mockReturnValue(
+        Promise.resolve(mockAction),
+      );
 
       const result = actionService.getAction("action-1");
 
@@ -74,7 +91,7 @@ describe("Action Service", () => {
     });
 
     it("should return undefined when the action does not exist", () => {
-      mockedActionRepository.getAction.mockReturnValue(undefined);
+      mockedActionRepository.getAction.mockReturnValue(Promise.resolve(null));
 
       const result = actionService.getAction("invalid-id");
 
@@ -88,56 +105,46 @@ describe("Action Service", () => {
 
   describe("Get Actions By Status", () => {
     it("should return open actions", () => {
-      const closedMockAction = {
-        id: "action-2",
-        title: "Update documentation",
-        ownerId: "member-2",
-        status: ActionStatus.OPEN,
-        dueDate: "2026-09-15",
-      };
-      const mockActions: ActionItem[] = [mockAction, closedMockAction];
-
-      mockedActionRepository.getActions.mockReturnValue(mockActions);
+      mockedActionRepository.countActionsByStatus.mockReturnValue(
+        Promise.resolve(2),
+      );
 
       const result = actionService.getActionsByStatus(ActionStatus.OPEN);
 
-      expect(result.length).toBe(2);
-      expect(result[0].status).toBe(ActionStatus.OPEN);
-      expect(result[1].status).toBe(ActionStatus.OPEN);
-      expect(mockedActionRepository.getActions).toHaveBeenCalledTimes(1);
+      expect(result).toBe(2);
+      expect(mockedActionRepository.countActionsByStatus).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it("should return closed actions", () => {
-      const closedMockAction = {
-        id: "action-2",
-        title: "Update documentation",
-        ownerId: "member-2",
-        status: ActionStatus.CLOSED,
-        dueDate: "2026-09-15",
-      };
-      const mockActions: ActionItem[] = [mockAction, closedMockAction];
-
-      mockedActionRepository.getActions.mockReturnValue(mockActions);
+      mockedActionRepository.countActionsByStatus.mockReturnValue(
+        Promise.resolve(1),
+      );
 
       const result = actionService.getActionsByStatus(ActionStatus.CLOSED);
 
-      expect(result.length).toBe(1);
-      expect(result[0].status).toBe(ActionStatus.CLOSED);
-      expect(mockedActionRepository.getActions).toHaveBeenCalledTimes(1);
+      expect(result).toBe(1);
+      expect(mockedActionRepository.countActionsByStatus).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 
   describe("Create Action", () => {
     it("should create an action successfully when the owner exists", () => {
-      mockedMemberRepository.getMember.mockReturnValue({
-        id: "member-1",
-        name: "John",
-        timezone: "Asia/Singapore",
-        role: {
-          id: "role-1",
-          name: "Developer",
-        },
-      });
+      mockedMemberRepository.getMember.mockReturnValue(
+        Promise.resolve({
+          id: "member-1",
+          name: "John",
+          timezone: "Asia/Singapore",
+          role: {
+            id: "role-1",
+            name: "Developer",
+          },
+          roleId: "role-1",
+        }),
+      );
 
       const mockUUID = "generated-action-id";
 
@@ -156,7 +163,7 @@ describe("Action Service", () => {
     });
 
     it("should throw an error when the owner does not exist", () => {
-      mockedMemberRepository.getMember.mockReturnValue(undefined);
+      mockedMemberRepository.getMember.mockReturnValue(Promise.resolve(null));
 
       expect(() => {
         actionService.createAction(mockAction);
@@ -168,45 +175,37 @@ describe("Action Service", () => {
 
   describe("Edit Action", () => {
     it("should edit an action successfully when the owner exists", () => {
-      const updatedAction: ActionItem = {
+      const updatedAction: ActionItemWithOwner = {
         id: "action-1",
         title: "Fix login bug - updated",
         ownerId: "member-1",
         status: ActionStatus.CLOSED,
         dueDate: "2026-09-30",
+        owner: {
+          name: "Jake",
+          id: "member-1",
+          roleId: "role-1",
+          timezone: "utc",
+        },
       };
 
-      mockedMemberRepository.getMember.mockReturnValue({
-        id: "member-1",
-        name: "John",
-        timezone: "Asia/Singapore",
-        role: {
-          id: "role-1",
-          name: "Developer",
-        },
-      });
-
-      mockedActionRepository.editAction.mockReturnValue(0);
-
-      const result = actionService.editAction("action-1", updatedAction);
-
-      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith("member-1");
+      actionService.editAction("action-1", updatedAction);
 
       expect(mockedActionRepository.editAction).toHaveBeenCalledWith(
         "action-1",
         updatedAction,
       );
-
-      expect(result).toBe(0);
     });
 
     it("should throw an error when the new owner does not exist", () => {
-      const updatedAction: ActionItem = {
+      const updatedAction: ActionItemWithOwner = {
         ...mockAction,
         ownerId: "invalid-member",
       };
 
-      mockedMemberRepository.getMember.mockReturnValue(undefined);
+      mockedActionRepository.editAction.mockRejectedValue(
+        "There is no member with the given ownerId!",
+      );
 
       expect(() => {
         actionService.editAction("action-1", updatedAction);
