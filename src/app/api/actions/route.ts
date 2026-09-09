@@ -54,7 +54,6 @@ export async function POST(
     const id = await actionService.createAction(data);
     return NextResponse.json({ id }, { status: 200 });
   } catch (err) {
-    console.log(err);
     return NextResponse.json(
       {
         errors: "There is no member with the given ownerId!",

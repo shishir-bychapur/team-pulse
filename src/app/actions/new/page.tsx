@@ -52,7 +52,6 @@ export default function CreateAction() {
         router.push(`/actions/${data.id}`);
       }
     } catch (error) {
-      console.error(error);
       toast.error("Error creating a new action!");
     }
   };

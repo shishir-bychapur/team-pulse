@@ -11,6 +11,9 @@ export const memberRepository = {
   },
   getMember: async (id: string): Promise<MemberWithRole | null> => {
     return await prisma.member.findFirst({
+      where: {
+        id,
+      },
       include: {
         role: true,
       },

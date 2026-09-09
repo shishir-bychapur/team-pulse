@@ -50,7 +50,6 @@ export default function CreateUpdate() {
         toast.success("Successfully created the update!");
       }
     } catch (error) {
-      console.error(error);
       toast.error("Error creating a new update!");
     }
   };
