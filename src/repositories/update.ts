@@ -1,6 +1,7 @@
 import { prisma } from "@/prisma/prisma";
 import { Mood } from "@/generated/prisma/enums";
 import { Update } from "@/generated/prisma/client";
+import { MoodBreakdownResult } from "../types/update";
 
 export const updateRepository = {
   getUpdates: async (
@@ -26,5 +27,15 @@ export const updateRepository = {
     await prisma.update.create({
       data: update,
     });
+  },
+  getMoodBreakdown: async (): Promise<MoodBreakdownResult[]> => {
+    const result = await prisma.update.groupBy({
+      by: ["mood"],
+      _count: {
+        mood: true,
+      },
+    });
+
+    return result;
   },
 };

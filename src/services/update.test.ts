@@ -3,6 +3,7 @@ import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
 import { Update } from "../types/update";
 import { Mood } from "@/generated/prisma/enums";
+import { MemberWithRole } from "../types/member";
 
 jest.mock("../repositories/member", () => ({
   memberRepository: {
@@ -31,7 +32,7 @@ describe("Update Service", () => {
     jest.clearAllMocks();
   });
 
-  const mockMembers = [
+  const mockMembers: MemberWithRole[] = [
     {
       id: "member-1",
       name: "Tom",
@@ -40,6 +41,7 @@ describe("Update Service", () => {
         id: "role-1",
         name: "Developer",
       },
+      roleId: "role-1",
     },
     {
       id: "member-2",
@@ -49,6 +51,7 @@ describe("Update Service", () => {
         id: "role-2",
         name: "Designer",
       },
+      roleId: "role-2",
     },
   ];
 
@@ -68,8 +71,12 @@ describe("Update Service", () => {
         "http://localhost:3000/updates?members=member-1&moods=GREEN&date=2026-09-01",
       );
 
-      mockedMemberRepository.getMembers.mockReturnValue(mockMembers);
-      mockedUpdateRepository.getUpdates.mockReturnValue(mockUpdates);
+      mockedMemberRepository.getMembers.mockReturnValue(
+        Promise.resolve(mockMembers),
+      );
+      mockedUpdateRepository.getUpdates.mockReturnValue(
+        Promise.resolve(mockUpdates),
+      );
 
       const result = updateService.getUpdates(url);
 
@@ -85,8 +92,10 @@ describe("Update Service", () => {
     it("should use all members when no member filter is provided", () => {
       const url = new URL("http://localhost:3000/updates?moods=GREEN");
 
-      mockedMemberRepository.getMembers.mockReturnValue(mockMembers);
-      mockedUpdateRepository.getUpdates.mockReturnValue([]);
+      mockedMemberRepository.getMembers.mockReturnValue(
+        Promise.resolve(mockMembers),
+      );
+      mockedUpdateRepository.getUpdates.mockReturnValue(Promise.resolve([]));
 
       updateService.getUpdates(url);
 
@@ -100,8 +109,10 @@ describe("Update Service", () => {
     it("should use all moods when no mood filter is provided", () => {
       const url = new URL("http://localhost:3000/updates?members=member-1");
 
-      mockedMemberRepository.getMembers.mockReturnValue(mockMembers);
-      mockedUpdateRepository.getUpdates.mockReturnValue([]);
+      mockedMemberRepository.getMembers.mockReturnValue(
+        Promise.resolve(mockMembers),
+      );
+      mockedUpdateRepository.getUpdates.mockReturnValue(Promise.resolve([]));
 
       updateService.getUpdates(url);
 
@@ -115,8 +126,10 @@ describe("Update Service", () => {
     it("should use all members and all moods when no filters are provided", () => {
       const url = new URL("http://localhost:3000/updates");
 
-      mockedMemberRepository.getMembers.mockReturnValue(mockMembers);
-      mockedUpdateRepository.getUpdates.mockReturnValue([]);
+      mockedMemberRepository.getMembers.mockReturnValue(
+        Promise.resolve(mockMembers),
+      );
+      mockedUpdateRepository.getUpdates.mockReturnValue(Promise.resolve([]));
 
       updateService.getUpdates(url);
 
@@ -132,8 +145,10 @@ describe("Update Service", () => {
         "http://localhost:3000/updates?members=member-1&moods=GREEN",
       );
 
-      mockedMemberRepository.getMembers.mockReturnValue(mockMembers);
-      mockedUpdateRepository.getUpdates.mockReturnValue([]);
+      mockedMemberRepository.getMembers.mockReturnValue(
+        Promise.resolve(mockMembers),
+      );
+      mockedUpdateRepository.getUpdates.mockReturnValue(Promise.resolve([]));
 
       updateService.getUpdates(url);
 
@@ -157,13 +172,9 @@ describe("Update Service", () => {
 
       const mockUUID = "generated-update-id";
 
-      mockedMemberRepository.getMember.mockReturnValue(mockMembers[0]);
-
       jest.spyOn(crypto, "randomUUID").mockReturnValue(mockUUID);
 
       updateService.createUpdate(mockUpdate);
-
-      expect(mockedMemberRepository.getMember).toHaveBeenCalledWith("member-1");
 
       expect(mockedUpdateRepository.createUpdate).toHaveBeenCalledWith({
         ...mockUpdate,
@@ -179,8 +190,6 @@ describe("Update Service", () => {
         date: "2026-09-01",
         text: "This should fail.",
       };
-
-      mockedMemberRepository.getMember.mockReturnValue(undefined);
 
       expect(() => {
         updateService.createUpdate(mockUpdate);

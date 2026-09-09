@@ -2,13 +2,14 @@ import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
 import { Mood } from "@/generated/prisma/enums";
 import { Update } from "@/generated/prisma/client";
+import { MoodBreakdownResult } from "../types/update";
 
 export const updateService = {
-  getUpdates: async (url: URL): Promise<Update[]> => {
-    let filteredMembers = url.searchParams.getAll("members");
-    let filteredMoods = url.searchParams.getAll("moods");
-    const date = url.searchParams.get("date");
-
+  getUpdates: async (
+    filteredMembers: string[],
+    filteredMoods: string[],
+    date: string | null,
+  ): Promise<Update[]> => {
     const members = await memberRepository.getMembers();
     const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
 
@@ -25,6 +26,9 @@ export const updateService = {
       filteredMoods.map((mood) => mood as Mood),
       date,
     );
+  },
+  getMoodBreakdown: async (): Promise<MoodBreakdownResult[]> => {
+    return await updateRepository.getMoodBreakdown();
   },
   createUpdate: async (update: Update): Promise<void> => {
     await updateRepository.createUpdate({ ...update, id: crypto.randomUUID() });

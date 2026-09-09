@@ -23,7 +23,13 @@ export async function GET(
       { status: 401 },
     );
   }
-  const updates = await updateService.getUpdates(new URL(req.url));
+
+  const url = new URL(req.url);
+  const updates = await updateService.getUpdates(
+    url.searchParams.getAll("members"),
+    url.searchParams.getAll("moods"),
+    url.searchParams.get("date"),
+  );
 
   return NextResponse.json({
     updates,

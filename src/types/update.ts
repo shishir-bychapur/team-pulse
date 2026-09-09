@@ -7,3 +7,10 @@ export interface Update {
   text: string;
   mood: Mood;
 }
+
+export interface MoodBreakdownResult {
+  mood: Mood;
+  _count: {
+    mood: number;
+  };
+}

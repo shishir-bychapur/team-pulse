@@ -6,6 +6,44 @@ export default function Export() {
 
   const exportCSV = () => {};
 
+  // const exportCSV = () => {
+  //   const updatesForDate = mockUpdates.filter(
+  //     (update) => update.date === selectedDate,
+  //   );
+
+  //   const headers = ["Member", "Update", "Mood", "Date"];
+
+  //   const rows = updatesForDate.map((update) => [
+  //     update.memberName,
+  //     update.text,
+  //     update.mood,
+  //     update.date,
+  //   ]);
+
+  //   const csvContent = [
+  //     headers.join(","),
+  //     ...rows.map((row) =>
+  //       row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","),
+  //     ),
+  //   ].join("\n");
+
+  //   const blob = new Blob([csvContent], {
+  //     type: "text/csv;charset=utf-8;",
+  //   });
+
+  //   const url = URL.createObjectURL(blob);
+
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.download = `updates-${selectedDate}.csv`;
+
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+
+  //   URL.revokeObjectURL(url);
+  // };
+
   return (
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="border-b border-gray-100 px-6 py-5">
