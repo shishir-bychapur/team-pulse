@@ -6,13 +6,13 @@ import UpdateCard from "../../components/updates/update";
 import MemberFilter from "../../components/filters/member-filter";
 import { useState, useEffect } from "react";
 import { Member } from "../../types/member";
-import { Update } from "../../types/update";
+import { UpdateWithMember } from "../../types/update";
 import Link from "next/link";
 import { memberAPI } from "@/src/utils/apis/member";
 import { updateAPI } from "@/src/utils/apis/update";
 
 const Updates = () => {
-  const [updates, setUpdates] = useState<Update[]>([]);
+  const [updates, setUpdates] = useState<UpdateWithMember[]>([]);
   const [memberFilter, setMemberFilter] = useState<string[]>([]);
   const [moodFilter, setMoodFilter] = useState<string[]>([]);
   const [dateFilter, setDateFilter] = useState<string>("");
@@ -128,13 +128,11 @@ const Updates = () => {
           </div>
         ) : (
           <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {updates.map((update: Update) => (
+            {updates.map((update: UpdateWithMember) => (
               <UpdateCard
                 key={update.id}
                 update={update}
-                memberName={
-                  members.find((m) => m.id === update.memberId)?.name || ""
-                }
+                memberName={update.member.name}
               />
             ))}
           </ul>

@@ -1,48 +1,44 @@
 "use client";
+
+import { UpdateWithMember } from "@/src/types/update";
+import { dateFormat } from "@/src/utils/date";
 import { useState } from "react";
 
-export default function Export() {
-  const [selectedDate, setSelectedDate] = useState("2026-09-08");
+export default function Export({ updates }: { updates: UpdateWithMember[] }) {
+  const [selectedDate, setSelectedDate] = useState(dateFormat());
 
-  const exportCSV = () => {};
+  const exportCSV = () => {
+    const headers = ["Member", "Update", "Mood"];
 
-  // const exportCSV = () => {
-  //   const updatesForDate = mockUpdates.filter(
-  //     (update) => update.date === selectedDate,
-  //   );
+    const rows = updates.map((update) => [
+      update.member.name,
+      update.text,
+      update.mood,
+    ]);
 
-  //   const headers = ["Member", "Update", "Mood", "Date"];
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
 
-  //   const rows = updatesForDate.map((update) => [
-  //     update.memberName,
-  //     update.text,
-  //     update.mood,
-  //     update.date,
-  //   ]);
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
 
-  //   const csvContent = [
-  //     headers.join(","),
-  //     ...rows.map((row) =>
-  //       row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","),
-  //     ),
-  //   ].join("\n");
+    const url = URL.createObjectURL(blob);
 
-  //   const blob = new Blob([csvContent], {
-  //     type: "text/csv;charset=utf-8;",
-  //   });
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `updates-${selectedDate}.csv`;
 
-  //   const url = URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-  //   const link = document.createElement("a");
-  //   link.href = url;
-  //   link.download = `updates-${selectedDate}.csv`;
-
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-
-  //   URL.revokeObjectURL(url);
-  // };
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm">

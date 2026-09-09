@@ -1,6 +1,6 @@
 import { UpdateForm } from "@/src/schema/update";
-import { Update } from "@/generated/prisma/client";
 import { getBaseUrl } from "../base-url";
+import { UpdateWithMember } from "@/src/types/update";
 
 export const updateAPI = {
   async createUpdate(data: UpdateForm): Promise<Response> {
@@ -11,7 +11,7 @@ export const updateAPI = {
     return response;
   },
 
-  async getUpdates(params: string): Promise<{ updates: Update[] }> {
+  async getUpdates(params: string): Promise<{ updates: UpdateWithMember[] }> {
     const response = await fetch(getBaseUrl() + `/api/updates?` + params);
     return await response.json();
   },

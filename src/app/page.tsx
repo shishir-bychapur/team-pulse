@@ -40,7 +40,7 @@ export default async function Dashboard() {
             totalMoods={totalMoods}
             moodBreakdown={moodBreakdown}
           />
-          <Export />
+          <Export updates={updatesToday} />
         </div>
       </div>
     </main>

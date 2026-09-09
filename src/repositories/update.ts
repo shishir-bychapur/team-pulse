@@ -1,14 +1,14 @@
 import { prisma } from "@/prisma/prisma";
 import { Mood } from "@/generated/prisma/enums";
 import { Update } from "@/generated/prisma/client";
-import { MoodBreakdownResult } from "../types/update";
+import { MoodBreakdownResult, UpdateWithMember } from "../types/update";
 
 export const updateRepository = {
   getUpdates: async (
     filteredMembers: string[],
     filteredMoods: Mood[],
     filteredDate: string | null,
-  ): Promise<Update[]> => {
+  ): Promise<UpdateWithMember[]> => {
     return await prisma.update.findMany({
       where: {
         memberId: {
@@ -20,6 +20,9 @@ export const updateRepository = {
         ...(filteredDate && {
           date: filteredDate,
         }),
+      },
+      include: {
+        member: true,
       },
     });
   },

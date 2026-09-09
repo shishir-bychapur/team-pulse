@@ -1,11 +1,11 @@
-import { Update } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { updateSchema } from "@/src/schema/update";
 import { updateService } from "@/src/services/update";
 import { verifySession } from "@/src/utils/session";
+import { UpdateWithMember } from "@/src/types/update";
 
 type GetResponseData = {
-  updates?: Update[];
+  updates?: UpdateWithMember[];
   errors?: string;
 };
 

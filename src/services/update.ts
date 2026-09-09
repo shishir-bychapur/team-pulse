@@ -2,14 +2,14 @@ import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
 import { Mood } from "@/generated/prisma/enums";
 import { Update } from "@/generated/prisma/client";
-import { MoodBreakdownResult } from "../types/update";
+import { MoodBreakdownResult, UpdateWithMember } from "../types/update";
 
 export const updateService = {
   getUpdates: async (
     filteredMembers: string[],
     filteredMoods: string[],
     date: string | null,
-  ): Promise<Update[]> => {
+  ): Promise<UpdateWithMember[]> => {
     const members = await memberRepository.getMembers();
     const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
 
