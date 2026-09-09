@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { AllMembers } from "./all-members";
-import { Member } from "@/src/types/member";
+import { MemberWithRole } from "@/src/types/member";
 
 const mockPush = jest.fn();
 
@@ -11,7 +11,7 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-const mockMembers: Member[] = [
+const mockMembers: MemberWithRole[] = [
   {
     id: "1",
     name: "Tom",
@@ -20,6 +20,8 @@ const mockMembers: Member[] = [
       name: "Developer",
     },
     timezone: "Asia/Singapore",
+    email: "tom@email.com",
+    roleId: "role-1",
   },
   {
     id: "2",
@@ -29,6 +31,8 @@ const mockMembers: Member[] = [
       name: "Designer",
     },
     timezone: "Asia/London",
+    email: "harry@email.com",
+    roleId: "role-2",
   },
   {
     id: "3",
@@ -38,6 +42,8 @@ const mockMembers: Member[] = [
       name: "Manager",
     },
     timezone: "America/New_York",
+    email: "dominic@email.com",
+    roleId: "role-3",
   },
 ];
 
