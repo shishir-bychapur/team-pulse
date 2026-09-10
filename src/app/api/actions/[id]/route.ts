@@ -29,11 +29,6 @@ export async function GET(
   try {
     const { id } = await params;
     const action = await actionService.getAction(id);
-
-    if (!action) {
-      return NextResponse.json({ action: null }, { status: 404 });
-    }
-
     return NextResponse.json({ action });
   } catch {
     return NextResponse.json(

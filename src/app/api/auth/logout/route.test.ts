@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { authService } from "@/src/services/auth";
 import { verifySession } from "@/src/utils/session";
@@ -28,17 +27,10 @@ describe("GET /api/auth/logout", () => {
     });
   });
 
-  const createRequest = () =>
-    new NextRequest("http://localhost:3000/api/auth/logout", {
-      method: "GET",
-    });
-
   it("should call authService.logout", async () => {
     mockedAuthService.logout.mockResolvedValue(undefined);
 
-    const req = createRequest();
-
-    await GET(req);
+    await GET();
 
     expect(mockedAuthService.logout).toHaveBeenCalledTimes(1);
   });
@@ -46,9 +38,7 @@ describe("GET /api/auth/logout", () => {
   it("should return 200 after logging out successfully", async () => {
     mockedAuthService.logout.mockResolvedValue(undefined);
 
-    const req = createRequest();
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -65,9 +55,7 @@ describe("GET /api/auth/logout", () => {
       id: null,
     });
 
-    const req = createRequest();
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -84,9 +72,7 @@ describe("GET /api/auth/logout", () => {
       new Error("Session deletion failed"),
     );
 
-    const req = createRequest();
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);

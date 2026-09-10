@@ -11,7 +11,7 @@ export const actionRepository = {
     });
   },
   getAction: async (id: string): Promise<ActionItemWithOwner | null> => {
-    return await prisma.actionItem.findFirst({
+    return await prisma.actionItem.findFirstOrThrow({
       where: {
         id,
       },

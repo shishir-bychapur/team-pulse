@@ -153,6 +153,8 @@ describe("Updates", () => {
     expect(
       screen.getByRole("button", { name: "My Updates" }),
     ).toBeInTheDocument();
+
+    await screen.findByText("0 updates");
   });
 
   it("fetches updates when the component mounts", async () => {
@@ -162,9 +164,9 @@ describe("Updates", () => {
 
     render(<Updates members={mockMembers} userId="member-1" />);
 
-    await waitFor(() => {
-      expect(mockedUpdateAPI.getUpdates).toHaveBeenCalledTimes(1);
-    });
+    await screen.findByText("Tom: Finished the dashboard");
+
+    expect(mockedUpdateAPI.getUpdates).toHaveBeenCalledTimes(1);
 
     expect(mockedUpdateAPI.getUpdates).toHaveBeenCalledWith("");
   });
@@ -180,9 +182,7 @@ describe("Updates", () => {
       await screen.findByText("Tom: Finished the dashboard"),
     ).toBeInTheDocument();
 
-    expect(
-      await screen.findByText("Harry: Working on tests"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Harry: Working on tests")).toBeInTheDocument();
 
     expect(screen.getByText("2 updates")).toBeInTheDocument();
   });
@@ -220,9 +220,7 @@ describe("Updates", () => {
 
     render(<Updates members={mockMembers} userId="member-1" />);
 
-    await waitFor(() => {
-      expect(mockedUpdateAPI.getUpdates).toHaveBeenCalledWith("");
-    });
+    await screen.findByText("0 updates");
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -243,6 +241,8 @@ describe("Updates", () => {
     });
 
     render(<Updates members={mockMembers} userId="member-1" />);
+
+    await screen.findByText("0 updates");
 
     const myUpdatesButton = screen.getByRole("button", {
       name: "My Updates",
@@ -270,6 +270,8 @@ describe("Updates", () => {
 
     render(<Updates members={mockMembers} userId="member-2" />);
 
+    await screen.findByText("0 updates");
+
     fireEvent.click(
       screen.getByRole("button", {
         name: /Member Filter/,
@@ -290,6 +292,8 @@ describe("Updates", () => {
 
     render(<Updates members={mockMembers} userId="member-1" />);
 
+    await screen.findByText("0 updates");
+
     fireEvent.click(
       screen.getByRole("button", {
         name: /Mood Filter/,
@@ -309,6 +313,8 @@ describe("Updates", () => {
     });
 
     render(<Updates members={mockMembers} userId="member-1" />);
+
+    await screen.findByText("0 updates");
 
     fireEvent.click(
       screen.getByRole("button", {

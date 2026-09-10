@@ -60,7 +60,7 @@ export async function POST(
   try {
     await updateService.createUpdate(data);
     return NextResponse.json({}, { status: 200 });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       {
         errors: "Something went wrong. Please try again later.",

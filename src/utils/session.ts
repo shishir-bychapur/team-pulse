@@ -32,24 +32,17 @@ export async function decrypt(
       algorithms: ["HS256"],
     });
 
-    if (
-      typeof payload.id !== "string" ||
-      typeof payload.name !== "string"
-    ) {
+    if (typeof payload.id !== "string" || typeof payload.name !== "string") {
       return null;
     }
 
     return payload as SessionPayload;
   } catch {
-    console.log("Failed to verify session");
     return null;
   }
 }
 
-export async function createSession(
-  id: string,
-  name: string,
-): Promise<void> {
+export async function createSession(id: string, name: string): Promise<void> {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const session = await encrypt({

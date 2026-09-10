@@ -3,7 +3,7 @@
 import { ActionForm, actionSchema } from "@/src/schema/action";
 import { actionAPI } from "@/src/utils/apis/action";
 import { memberAPI } from "@/src/utils/apis/member";
-import { ActionItem } from "@/src/types/action";
+import { ActionItemWithOwner } from "@/src/types/action";
 import { ActionStatus } from "@/generated/prisma/enums";
 import { MemberWithRole } from "@/src/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ export default function EditAction() {
   const router = useRouter();
   const actionId = params.id;
   const [members, setMembers] = useState<MemberWithRole[]>([]);
-  const [action, setAction] = useState<ActionItem | null>(null);
+  const [action, setAction] = useState<ActionItemWithOwner | null>(null);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -73,8 +73,7 @@ export default function EditAction() {
         toast.success("Successfully edited the action!");
         router.push(`/actions/${actionId}`);
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Error editing the action!");
     }
   };

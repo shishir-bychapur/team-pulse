@@ -1,20 +1,4 @@
-import { Role } from "../types/member";
 import { Member } from "@/generated/prisma/client";
-
-const roles: Role[] = [
-  {
-    id: "1",
-    name: "Developer",
-  },
-  {
-    id: "2",
-    name: "Designer",
-  },
-  {
-    id: "3",
-    name: "Manager",
-  },
-];
 
 export const members: Member[] = [
   {

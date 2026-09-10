@@ -31,29 +31,24 @@ export default function Updates({
     }
   };
 
-  const addParams = () => {
-    const params = new URLSearchParams();
-
-    memberFilter.forEach((member) => {
-      params.append("members", member);
-    });
-
-    moodFilter.forEach((mood) => {
-      params.append("moods", mood);
-    });
-
-    if (dateFilter !== "") {
-      params.append("date", dateFilter);
-    }
-
-    return params.toString();
-  };
-
   useEffect(() => {
     const fetchUpdates = async () => {
       try {
-        const params = addParams();
-        const data = await updateAPI.getUpdates(params);
+        const params = new URLSearchParams();
+
+        memberFilter.forEach((member) => {
+          params.append("members", member);
+        });
+
+        moodFilter.forEach((mood) => {
+          params.append("moods", mood);
+        });
+
+        if (dateFilter !== "") {
+          params.append("date", dateFilter);
+        }
+
+        const data = await updateAPI.getUpdates(params.toString());
 
         setUpdates(data.updates);
       } catch (error) {

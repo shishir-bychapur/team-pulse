@@ -66,8 +66,8 @@ describe("GET /api/actions/[id]", () => {
     expect(mockedActionService.getAction).toHaveBeenCalledTimes(1);
   });
 
-  it("should return status 404 and null when the action does not exist", async () => {
-    mockedActionService.getAction.mockResolvedValue(null);
+  it("should return status 500 when the action does not exist", async () => {
+    mockedActionService.getAction.mockRejectedValue(new Error("Invalid Id!"));
 
     const req = new NextRequest(`${baseUrl}/invalid-id`);
     const params = Promise.resolve({
@@ -75,13 +75,8 @@ describe("GET /api/actions/[id]", () => {
     });
 
     const response = await GET(req, { params });
-    const data = await response.json();
 
-    expect(response.status).toBe(404);
-
-    expect(data).toEqual({
-      action: null,
-    });
+    expect(response.status).toBe(500);
 
     expect(mockedActionService.getAction).toHaveBeenCalledWith("invalid-id");
   });
@@ -201,6 +196,7 @@ describe("PATCH /api/actions/[id]", () => {
 
   describe("should return validation error when", () => {
     it("title is missing", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { title, ...invalidAction } = mockValidAction;
 
       const req = new NextRequest(`${baseUrl}/act-1`, {

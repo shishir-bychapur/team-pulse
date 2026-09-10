@@ -13,7 +13,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
       await authAPI.logout();
       router.refresh();
       router.push("/login");
-    } catch (err) {
+    } catch {
       toast.error("Error logging out!");
     }
   };

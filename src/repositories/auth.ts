@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Member } from "@/generated/prisma/client";
 import { prisma } from "@/prisma/prisma";
 

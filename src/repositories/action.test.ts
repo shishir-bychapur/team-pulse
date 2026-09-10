@@ -8,6 +8,7 @@ jest.mock("@/prisma/prisma", () => ({
     actionItem: {
       findMany: jest.fn(),
       findFirst: jest.fn(),
+      findFirstOrThrow: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
@@ -68,14 +69,14 @@ describe("Action Repository", () => {
       const mockAction = mockActionItems[0];
 
       jest
-        .mocked(prisma.actionItem.findFirst)
+        .mocked(prisma.actionItem.findFirstOrThrow)
         .mockResolvedValue(mockAction as never);
 
       const data = await actionRepository.getAction("1");
 
       expect(data).toEqual(mockAction);
 
-      expect(prisma.actionItem.findFirst).toHaveBeenCalledWith({
+      expect(prisma.actionItem.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           id: "1",
         },
@@ -85,14 +86,16 @@ describe("Action Repository", () => {
       });
     });
 
-    it("should return null when the action does not exist", async () => {
-      jest.mocked(prisma.actionItem.findFirst).mockResolvedValue(null);
+    it("should throw error when the action does not exist", async () => {
+      jest
+        .mocked(prisma.actionItem.findFirstOrThrow)
+        .mockRejectedValue(new Error("Action doesnt exist"));
 
-      const data = await actionRepository.getAction("999");
+      expect(actionRepository.getAction("999")).rejects.toThrow(
+        "Action doesnt exist",
+      );
 
-      expect(data).toBeNull();
-
-      expect(prisma.actionItem.findFirst).toHaveBeenCalledWith({
+      expect(prisma.actionItem.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           id: "999",
         },

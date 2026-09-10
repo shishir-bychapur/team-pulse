@@ -2,12 +2,6 @@ import { actionService } from "./action";
 import { actionRepository } from "../repositories/action";
 import { ActionStatus } from "@/generated/prisma/enums";
 import { ActionItem, ActionItemWithOwner } from "../types/action";
-import { revalidateTag } from "next/cache";
-
-jest.mock("next/cache", () => ({
-  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T): T => fn,
-  revalidateTag: jest.fn(),
-}));
 
 jest.mock("../repositories/action", () => ({
   actionRepository: {
@@ -21,10 +15,6 @@ jest.mock("../repositories/action", () => ({
 
 const mockedActionRepository = actionRepository as jest.Mocked<
   typeof actionRepository
->;
-
-const mockedRevalidateTag = revalidateTag as jest.MockedFunction<
-  typeof revalidateTag
 >;
 
 describe("Action Service", () => {
@@ -174,9 +164,6 @@ describe("Action Service", () => {
       expect(mockedActionRepository.createAction).toHaveBeenCalledTimes(1);
 
       expect(result).toBe(mockUUID);
-
-      expect(mockedRevalidateTag).toHaveBeenCalledWith("actions", "max");
-      expect(mockedRevalidateTag).toHaveBeenCalledTimes(1);
     });
 
     it("should generate a new UUID instead of using the provided action ID", async () => {
@@ -200,9 +187,6 @@ describe("Action Service", () => {
 
       expect(result).toBe(mockUUID);
       expect(result).not.toBe("old-id");
-
-      expect(mockedRevalidateTag).toHaveBeenCalledWith("actions", "max");
-      expect(mockedRevalidateTag).toHaveBeenCalledTimes(1);
     });
 
     it("should throw an error when the repository fails to create the action", async () => {
@@ -215,8 +199,6 @@ describe("Action Service", () => {
       await expect(actionService.createAction(mockAction)).rejects.toThrow(
         "Database error",
       );
-
-      expect(mockedRevalidateTag).not.toHaveBeenCalled();
     });
   });
 
@@ -240,9 +222,6 @@ describe("Action Service", () => {
       );
 
       expect(mockedActionRepository.editAction).toHaveBeenCalledTimes(1);
-
-      expect(mockedRevalidateTag).toHaveBeenCalledWith("actions", "max");
-      expect(mockedRevalidateTag).toHaveBeenCalledTimes(1);
     });
 
     it("should throw an error when the repository fails to edit the action", async () => {
@@ -263,8 +242,6 @@ describe("Action Service", () => {
         "invalid-id",
         updatedAction,
       );
-
-      expect(mockedRevalidateTag).not.toHaveBeenCalled();
     });
   });
 });

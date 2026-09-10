@@ -49,7 +49,7 @@ export default function CreateUpdate() {
         reset();
         toast.success("Successfully created the update!");
       }
-    } catch (error) {
+    } catch {
       toast.error("Error creating a new update!");
     }
   };

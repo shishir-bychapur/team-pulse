@@ -51,7 +51,7 @@ export default function CreateAction() {
         const data: { id: string } = await response.json();
         router.push(`/actions/${data.id}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Error creating a new action!");
     }
   };

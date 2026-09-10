@@ -26,7 +26,7 @@ export default function SignInPage() {
       await authAPI.login(data.username, data.password);
       router.refresh();
       router.push("/");
-    } catch (err) {
+    } catch {
       toast.error("Invalid credentials! Please try again.");
     }
   };

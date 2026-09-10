@@ -20,8 +20,6 @@ const mockedActionService = actionService as jest.Mocked<typeof actionService>;
 const mockedVerifySession = jest.mocked(verifySession);
 
 describe("GET /api/actions", () => {
-  const baseUrl = "http://localhost:3000/api/actions";
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -66,9 +64,7 @@ describe("GET /api/actions", () => {
 
     mockedActionService.getActions.mockResolvedValue(mockActions);
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -83,9 +79,7 @@ describe("GET /api/actions", () => {
   it("should return an empty array when there are no actions", async () => {
     mockedActionService.getActions.mockResolvedValue([]);
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -104,9 +98,7 @@ describe("GET /api/actions", () => {
       id: null,
     });
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -123,9 +115,7 @@ describe("GET /api/actions", () => {
       new Error("Database error"),
     );
 
-    const req = new NextRequest(baseUrl);
-
-    const response = await GET(req);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -184,6 +174,7 @@ describe("POST /api/actions", () => {
 
   describe("Validation", () => {
     it("should return validation error when title is missing", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { title, ...invalidAction } = mockValidAction;
 
       const req = new NextRequest(baseUrl, {

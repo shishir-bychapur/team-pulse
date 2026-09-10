@@ -6,9 +6,7 @@ type GetResponseData = {
   errors?: string;
 };
 
-export async function GET(
-  req: Request,
-): Promise<NextResponse<GetResponseData>> {
+export async function GET(): Promise<NextResponse<GetResponseData>> {
   const session = await verifySession();
 
   if (!session.isAuth) {
