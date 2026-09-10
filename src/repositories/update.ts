@@ -11,12 +11,16 @@ export const updateRepository = {
   ): Promise<UpdateWithMember[]> => {
     return await prisma.update.findMany({
       where: {
-        memberId: {
-          in: filteredMembers,
-        },
-        mood: {
-          in: filteredMoods,
-        },
+        ...(filteredMembers.length > 0 && {
+          memberId: {
+            in: filteredMembers,
+          },
+        }),
+        ...(filteredMoods.length > 0 && {
+          mood: {
+            in: filteredMoods,
+          },
+        }),
         ...(filteredDate && {
           date: filteredDate,
         }),

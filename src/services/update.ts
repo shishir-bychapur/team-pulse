@@ -1,5 +1,4 @@
 import { unstable_cache, revalidateTag } from "next/cache";
-import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
 import { Mood } from "@/generated/prisma/enums";
 import { Update } from "@/generated/prisma/client";
@@ -11,18 +10,11 @@ const getCachedUpdates = unstable_cache(
     filteredMoods: string[],
     date: string | null,
   ): Promise<UpdateWithMember[]> => {
-    const members = await memberRepository.getMembers();
-    const moods = [Mood.RED, Mood.YELLOW, Mood.GREEN];
-
-    const memberIds = filteredMembers.length
-      ? filteredMembers
-      : members.map((member) => member.id);
-
-    const selectedMoods = filteredMoods.length
-      ? filteredMoods.map((mood) => mood as Mood)
-      : moods;
-
-    return updateRepository.getUpdates(memberIds, selectedMoods, date);
+    return updateRepository.getUpdates(
+      filteredMembers,
+      filteredMoods.map((mood) => mood as Mood),
+      date,
+    );
   },
   ["updates"],
   {

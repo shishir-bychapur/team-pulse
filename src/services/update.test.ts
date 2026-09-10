@@ -1,21 +1,13 @@
 import { updateService } from "./update";
-import { memberRepository } from "../repositories/member";
 import { updateRepository } from "../repositories/update";
 import { Update } from "@/generated/prisma/client";
 import { Mood } from "@/generated/prisma/enums";
-import { MemberWithRole } from "../types/member";
 import { UpdateWithMember } from "../types/update";
 import { revalidateTag } from "next/cache";
 
 jest.mock("next/cache", () => ({
   unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T): T => fn,
   revalidateTag: jest.fn(),
-}));
-
-jest.mock("../repositories/member", () => ({
-  memberRepository: {
-    getMembers: jest.fn(),
-  },
 }));
 
 jest.mock("../repositories/update", () => ({
@@ -25,10 +17,6 @@ jest.mock("../repositories/update", () => ({
     createUpdate: jest.fn(),
   },
 }));
-
-const mockedMemberRepository = memberRepository as jest.Mocked<
-  typeof memberRepository
->;
 
 const mockedUpdateRepository = updateRepository as jest.Mocked<
   typeof updateRepository
@@ -42,31 +30,6 @@ describe("Update Service", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const mockMembers: MemberWithRole[] = [
-    {
-      id: "member-1",
-      name: "Tom",
-      email: "tom@example.com",
-      timezone: "Asia/Singapore",
-      roleId: "role-1",
-      role: {
-        id: "role-1",
-        name: "Developer",
-      },
-    },
-    {
-      id: "member-2",
-      name: "Harry",
-      email: "harry@example.com",
-      timezone: "Europe/London",
-      roleId: "role-2",
-      role: {
-        id: "role-2",
-        name: "Designer",
-      },
-    },
-  ];
 
   const mockUpdates: UpdateWithMember[] = [
     {
@@ -87,8 +50,6 @@ describe("Update Service", () => {
 
   describe("Get Updates", () => {
     it("should get updates using the provided filters", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue(mockUpdates);
 
       const result = await updateService.getUpdates(
@@ -99,8 +60,6 @@ describe("Update Service", () => {
 
       expect(result).toEqual(mockUpdates);
 
-      expect(mockedMemberRepository.getMembers).toHaveBeenCalledTimes(1);
-
       expect(mockedUpdateRepository.getUpdates).toHaveBeenCalledWith(
         ["member-1"],
         [Mood.GREEN],
@@ -109,8 +68,6 @@ describe("Update Service", () => {
     });
 
     it("should use all members when no member filters are provided", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue([]);
 
       const result = await updateService.getUpdates([], [Mood.GREEN], null);
@@ -118,29 +75,25 @@ describe("Update Service", () => {
       expect(result).toEqual([]);
 
       expect(mockedUpdateRepository.getUpdates).toHaveBeenCalledWith(
-        ["member-1", "member-2"],
+        [],
         [Mood.GREEN],
         null,
       );
     });
 
     it("should use all moods when no mood filters are provided", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue([]);
 
       await updateService.getUpdates(["member-1"], [], null);
 
       expect(mockedUpdateRepository.getUpdates).toHaveBeenCalledWith(
         ["member-1"],
-        [Mood.RED, Mood.YELLOW, Mood.GREEN],
+        [],
         null,
       );
     });
 
     it("should use all members and all moods when no filters are provided", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue(mockUpdates);
 
       const result = await updateService.getUpdates([], [], null);
@@ -148,15 +101,13 @@ describe("Update Service", () => {
       expect(result).toEqual(mockUpdates);
 
       expect(mockedUpdateRepository.getUpdates).toHaveBeenCalledWith(
-        ["member-1", "member-2"],
-        [Mood.RED, Mood.YELLOW, Mood.GREEN],
+        [],
+        [],
         null,
       );
     });
 
     it("should pass null when no date is provided", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue([]);
 
       await updateService.getUpdates(["member-1"], [Mood.GREEN], null);
@@ -169,8 +120,6 @@ describe("Update Service", () => {
     });
 
     it("should convert mood strings to Mood enum values", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue([]);
 
       await updateService.getUpdates(["member-1"], ["RED", "GREEN"], null);
@@ -183,8 +132,6 @@ describe("Update Service", () => {
     });
 
     it("should return an empty array when no updates are found", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockResolvedValue([]);
 
       const result = await updateService.getUpdates(
@@ -196,21 +143,7 @@ describe("Update Service", () => {
       expect(result).toEqual([]);
     });
 
-    it("should throw an error when getting members fails", async () => {
-      mockedMemberRepository.getMembers.mockRejectedValue(
-        new Error("Failed to get members"),
-      );
-
-      await expect(updateService.getUpdates([], [], null)).rejects.toThrow(
-        "Failed to get members",
-      );
-
-      expect(mockedUpdateRepository.getUpdates).not.toHaveBeenCalled();
-    });
-
     it("should throw an error when getting updates fails", async () => {
-      mockedMemberRepository.getMembers.mockResolvedValue(mockMembers);
-
       mockedUpdateRepository.getUpdates.mockRejectedValue(
         new Error("Failed to get updates"),
       );
