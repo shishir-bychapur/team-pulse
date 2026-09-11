@@ -30,12 +30,4 @@ export const actionAPI = {
     });
     return response;
   },
-  async getActionsCountByStatus(
-    status: ActionStatus,
-  ): Promise<{ count: number | null }> {
-    const response = await fetch(
-      getBaseUrl() + `/api/actions/count?status=${status}`,
-    );
-    return await response.json();
-  },
 };
